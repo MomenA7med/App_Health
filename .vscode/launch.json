@@ -1,0 +1,62 @@
+
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "launch development",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_development.dart",
+            "args": [
+                "--flavor",
+                "development",
+                "--target",
+                "lib/main_development.dart",
+                "--dart-define-from-file=config/config.development.json"
+
+            ]
+        },
+       
+        {
+            "name": "launch QC",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_qc.dart",
+            "args": [
+                "--flavor",
+                "qc",
+                "--target",
+                "lib/main_qc.dart",
+                "--dart-define-from-file=config/config.qc.json"
+
+            ]
+        },
+        {
+            "name": "launch staging",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_staging.dart",
+            "args": [
+                "--flavor",
+                "staging",
+                "--target",
+                "lib/main_staging.dart",
+                "--dart-define-from-file=config/config.staging.json"
+            ]
+        },
+         {
+            "name": "launch production",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_production.dart",
+            "args": [
+                "--flavor",
+                "production",
+                "--target",
+                "lib/main_production.dart",
+                "--dart-define-from-file=config/config.production.json"
+            ]
+        },
+    ],
+}

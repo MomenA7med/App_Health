@@ -1,0 +1,7 @@
+#  change image path and run command below to apply in ios and android
+# flutter pub run flutter_launcher_icons -f flutter_launcher_icons*
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo/app_icons/app-icon-stg.png"
+  remove_alpha_ios : true
