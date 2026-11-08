@@ -40,4 +40,5 @@ enum PreferencesKeys {
   titleAr,
   nationalityEn,
   nationalityAr,
+  address,
 }

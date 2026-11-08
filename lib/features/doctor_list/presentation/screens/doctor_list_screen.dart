@@ -1,14 +1,24 @@
+import 'package:app_health/features/doctor_details/presentation/screens/doctor_details_screen.dart';
+import 'package:app_health/features/addresses/presentation/widgets/choose_address_bottom_sheet.dart';
+import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
+import 'package:app_health/res/app_asset_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_health/apis/_base/dio_api_manager.dart';
+import 'package:app_health/core/pagination_manager.dart';
 import 'package:app_health/core/widgets/base_stateful_screen_widget.dart';
+import 'package:app_health/features/core/data/models/meta/paging_send_model.dart';
+import 'package:app_health/features/core/domain/entities/meta/meta_ui_model.dart';
 import 'package:app_health/features/doctor_list/data/datasources/doctor_list_api_manager.dart';
 import 'package:app_health/features/doctor_list/data/models/doctor_filter_model.dart';
+import 'package:app_health/features/doctor_list/data/models/doctor_list_send_model.dart';
+import 'package:app_health/features/doctor_list/data/models/specialty_doctors_response_model.dart';
 import 'package:app_health/features/doctor_list/data/repository/doctor_list_repository.dart';
-import 'package:app_health/features/doctor_list/domain/usecases/get_specialty_doctors_usecase.dart';
+import 'package:app_health/features/doctor_list/domain/usecases/get_doctor_list_use_case.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_bloc.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_event.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_state.dart';
@@ -17,6 +27,7 @@ import 'package:app_health/features/doctor_list/presentation/widgets/doctor_card
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_search_bar_widget.dart';
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_sort_bottom_sheet_widget.dart';
 import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
+import 'package:app_health/features/widgets/pagination_widgets/paging_swipe_to_refresh_list_widget.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/feedback/feedback_message.dart';
 import 'package:app_health/utils/loaders/loader_widget.dart';
@@ -41,10 +52,7 @@ class DoctorListScreen extends StatelessWidget {
   }) {
     context.push(
       routeName,
-      extra: {
-        'specialtyId': specialtyId,
-        'specialtyTitle': specialtyTitle,
-      },
+      extra: {'specialtyId': specialtyId, 'specialtyTitle': specialtyTitle},
     );
   }
 
@@ -54,14 +62,11 @@ class DoctorListScreen extends StatelessWidget {
     final DoctorListRepository repository = DoctorListRepository(
       DoctorListApiManager(dioApiManager),
     );
-    final GetSpecialtyDoctorsUseCase useCase = GetSpecialtyDoctorsUseCase(
-      repository,
-    );
+    final GetDoctorListsUseCase useCase = GetDoctorListsUseCase(repository);
 
-    return BlocProvider<DoctorListBloc>(
+    return BlocProvider<DoctorListsBloc>(
       create: (BuildContext context) =>
-          DoctorListBloc(getSpecialtyDoctorsUseCase: useCase)
-            ..add(FetchSpecialtyDoctorsEvent(specialtyId: specialtyId)),
+          DoctorListsBloc(getDoctorListsUseCase: useCase),
       child: DoctorListScreenWithBloc(
         specialtyId: specialtyId,
         specialtyTitle: specialtyTitle,
@@ -86,13 +91,92 @@ class DoctorListScreenWithBloc extends BaseStatefulScreenWidget {
 }
 
 class _DoctorListScreenWithBlocState
-    extends BaseScreenState<DoctorListScreenWithBloc> {
+    extends BaseScreenState<DoctorListScreenWithBloc>
+    with PaginationManager<DoctorModel> {
+  MetaUiModel _metaUiModel = MetaUiModel.emptyOne();
+  late DoctorListSendModel sendModel;
   final TextEditingController _searchController = TextEditingController();
+  DoctorSortOption currentSort = DoctorSortOption.nearest;
+  DoctorFilterModel currentFilter = DoctorFilterModel.initial;
+  bool empty = false;
+  int count = 0;
+
+  @override
+  void initState() {
+    sendModel = DoctorListSendModel(
+      specialtyId: widget.specialtyId,
+      pagination: PagingListSendModel(pageSize: 10),
+    );
+    Future.microtask(_getDoctorListsApiEvent);
+    super.initState();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  DoctorListsBloc get currentBloc => BlocProvider.of<DoctorListsBloc>(context);
+
+  void _getDoctorListsApiEvent() {
+    sendModel.pagination.pageNumber++;
+    currentBloc.add(GetDoctorListsApiEvent(sendModel: sendModel));
+  }
+
+  void _resetPaging() {
+    sendModel.pagination = PagingListSendModel(pageSize: 10);
+    resetPagination();
+  }
+
+  @override
+  lastPageCallback() {
+    currentBloc.add(NoMoreDataToLoadEvent());
+  }
+
+  void _applyFilter(DoctorFilterModel filter) {
+    currentFilter = filter;
+    sendModel.governorateId =
+        (filter.governorateId != null && filter.governorateId!.isNotEmpty)
+            ? filter.governorateId
+            : null;
+    sendModel.areaId =
+        (filter.areaId != null && filter.areaId!.isNotEmpty)
+            ? filter.areaId
+            : null;
+    sendModel.insuranceCompanyId =
+        (filter.insuranceCompanyId != null &&
+                filter.insuranceCompanyId!.isNotEmpty)
+            ? filter.insuranceCompanyId
+            : null;
+    sendModel.doctorType = (filter.gender != null && filter.gender != 0)
+        ? filter.gender
+        : null;
+    sendModel.minFee = filter.minPrice;
+    sendModel.maxFee = filter.maxPrice;
+    int? dateFilterInt;
+    if (filter.consultationDate == 'today' || filter.consultationDate == '1') {
+      dateFilterInt = 1;
+    } else if (filter.consultationDate == 'tomorrow' ||
+        filter.consultationDate == '2') {
+      dateFilterInt = 2;
+    }
+    sendModel.dateFilter = dateFilterInt;
+    _resetPaging();
+    _getDoctorListsApiEvent();
+  }
+
+  void _applySort(DoctorSortOption sort) {
+    currentSort = sort;
+    sendModel.sortBy = sort.toString();
+    _resetPaging();
+    _getDoctorListsApiEvent();
+  }
+
+  void _textChanged(String value) {
+    _resetPaging();
+    sendModel.pagination.searchText = value;
+    _getDoctorListsApiEvent();
   }
 
   String _getSortOptionLabel(BuildContext context, DoctorSortOption option) {
@@ -108,84 +192,14 @@ class _DoctorListScreenWithBlocState
     }
   }
 
-  Widget _buildTopBar(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Back Button on the right (RTL start)
-        InkWell(
-          onTap: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            } else {
-              context.pop();
-            }
-          },
-          borderRadius: BorderRadius.circular(20.r),
-          child: Container(
-            width: 40.r,
-            height: 40.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16.r,
-              color: AppColors.buttonBlackTextColor,
-            ),
-          ),
-        ),
-
-        // Location Selector Pill on the left/center (RTL end)
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                size: 18.r,
-                color: AppColors.colorPrimary,
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                context.translate(LocalizationKeys.defaultLocation),
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.buttonBlackTextColor,
-                ),
-              ),
-              SizedBox(width: 4.w),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 20,
-                color: Color(0xFF64748B),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildHeader(BuildContext context, int count) {
-    final title = widget.specialtyTitle.isNotEmpty
-        ? '${context.translate(LocalizationKeys.doctorsOf)} ${widget.specialtyTitle}'
-        : context.translate(LocalizationKeys.doctors);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Title on the right (RTL start)
         Text(
-          title,
+          '${context.translate(LocalizationKeys.doctorsOf)} ${widget.specialtyTitle}',
           style: TextStyle(
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
@@ -212,12 +226,7 @@ class _DoctorListScreenWithBlocState
     );
   }
 
-  Widget _buildFilterAndSortRow(
-    BuildContext context,
-    DoctorListLoadedState state,
-  ) {
-    final hasActiveFilter = state.filter.hasActiveFilters;
-
+  Widget _buildFilterAndSortRow(BuildContext context) {
     return Row(
       children: [
         // Filter Button on the right (RTL start)
@@ -226,43 +235,38 @@ class _DoctorListScreenWithBlocState
             onTap: () {
               DoctorListFilterScreen.open(
                 context: context,
-                currentFilter: state.filter,
-                onApply: (filter) {
-                  context.read<DoctorListBloc>().add(
-                        ApplyFilterEvent(filter),
-                      );
-                },
+                currentFilter: currentFilter,
+                onApply: _applyFilter,
               );
             },
             borderRadius: BorderRadius.circular(24.r),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: hasActiveFilter
-                    ? AppColors.colorSecondary
-                    : const Color(0xFFEBF5F5),
+                color: AppColors.colorSecondary,
                 borderRadius: BorderRadius.circular(24.r),
-                border: Border.all(
-                  color: AppColors.colorPrimary,
-                  width: 1.2,
-                ),
+                border: Border.all(color: AppColors.colorPrimary, width: 1.2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SvgPicture.asset(
+                    AppAssetPaths.filterIcon,
+                    width: 18.w,
+                    height: 18.h,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.textSecondaryColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
                   Text(
                     context.translate(LocalizationKeys.filter),
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.colorPrimary,
+                      color: AppColors.textSecondaryColor,
                     ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Icon(
-                    Icons.tune_rounded,
-                    size: 18.r,
-                    color: AppColors.colorPrimary,
                   ),
                 ],
               ),
@@ -277,41 +281,37 @@ class _DoctorListScreenWithBlocState
             onTap: () {
               DoctorSortBottomSheetWidget.show(
                 context: context,
-                currentSort: state.sortOption,
-                onApply: (sort) {
-                  context.read<DoctorListBloc>().add(
-                        ChangeSortOptionEvent(sort),
-                      );
-                },
+                currentSort: currentSort,
+                onApply: _applySort,
               );
             },
             borderRadius: BorderRadius.circular(24.r),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(24.r),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 22,
+                    color: AppColors.textSecondaryColor,
+                  ),
+                  SizedBox(width: 6.w),
                   Flexible(
                     child: Text(
-                      _getSortOptionLabel(context, state.sortOption),
+                      _getSortOptionLabel(context, currentSort),
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF334155),
+                        color: AppColors.textHeader,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  SizedBox(width: 6.w),
-                  const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 18,
-                    color: Color(0xFF64748B),
                   ),
                 ],
               ),
@@ -326,65 +326,79 @@ class _DoctorListScreenWithBlocState
   Widget baseScreenBuild(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
+      appBar: CustomAppBar(
+        showLocation: true,
+        onLocationTap: () async {
+          await ChooseAddressBottomSheet.show(
+            context: context,
+            onSelectAddress: (selected) {
+              setState(() {
+                sendModel.governorateId = selected.governorate;
+                sendModel.areaId = selected.area;
+              });
+              resetPagination();
+              _getDoctorListsApiEvent();
+            },
+            onSelectCurrentLocation: () {
+              setState(() {
+                sendModel.governorateId = null;
+                sendModel.areaId = null;
+              });
+              resetPagination();
+              _getDoctorListsApiEvent();
+            },
+          );
+        },
+      ),
       body: SafeArea(
-        child: BlocConsumer<DoctorListBloc, DoctorListState>(
+        top: false,
+        child: BlocConsumer<DoctorListsBloc, DoctorListsState>(
           listener: (context, state) {
             if (state is DoctorListErrorState) {
+              stopPaginationLoading();
               showFeedbackMessage(
                 state.isLocalizationKey
-                    ? context.translate(state.errorMessage)
-                    : state.errorMessage,
+                    ? context.translate(state.errorMassage)
+                    : state.errorMassage,
               );
+            } else if (state is DoctorListsLoadedState) {
+              _metaUiModel = state.doctorListResponse.metaUiModel;
+              count = state.doctorListResponse.metaUiModel.total;
+              stopPaginationLoading();
+              alignPaginationWithApi(
+                _metaUiModel.hasPrevious,
+                _metaUiModel.hasNext,
+                state.doctorListResponse.doctorList,
+              );
+              if (getUpdatedData.isEmpty) {
+                empty = true;
+              } else {
+                empty = false;
+              }
             }
           },
           builder: (context, state) {
-            final int count = state is DoctorListLoadedState
-                ? state.displayedDoctors.length
-                : 0;
-
-            return RefreshIndicator(
-              color: AppColors.colorPrimary,
-              onRefresh: () async {
-                context.read<DoctorListBloc>().add(
-                      FetchSpecialtyDoctorsEvent(
-                        specialtyId: widget.specialtyId,
-                        isRefresh: true,
-                      ),
-                    );
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 12.h),
-                    _buildTopBar(context),
-                    SizedBox(height: 16.h),
-                    _buildHeader(context, count),
-                    SizedBox(height: 16.h),
-                    DoctorSearchBarWidget(
-                      controller: _searchController,
-                      onChanged: (query) {
-                        context.read<DoctorListBloc>().add(
-                              SearchDoctorsEvent(query),
-                            );
-                      },
-                      onClear: () {
-                        _searchController.clear();
-                        context.read<DoctorListBloc>().add(
-                              const SearchDoctorsEvent(''),
-                            );
-                      },
-                    ),
-                    SizedBox(height: 14.h),
-                    if (state is DoctorListLoadedState)
-                      _buildFilterAndSortRow(context, state)
-                    else
-                      SizedBox(height: 42.h),
-                    SizedBox(height: 16.h),
-                    Expanded(child: _buildContent(context, state)),
-                  ],
-                ),
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 12.h),
+                  _buildHeader(context, count),
+                  SizedBox(height: 16.h),
+                  DoctorSearchBarWidget(
+                    controller: _searchController,
+                    onChanged: _textChanged,
+                    onClear: () {
+                      _searchController.clear();
+                      _textChanged('');
+                    },
+                  ),
+                  SizedBox(height: 14.h),
+                  _buildFilterAndSortRow(context),
+                  SizedBox(height: 16.h),
+                  Expanded(child: _buildContent(context, state)),
+                ],
               ),
             );
           },
@@ -393,12 +407,12 @@ class _DoctorListScreenWithBlocState
     );
   }
 
-  Widget _buildContent(BuildContext context, DoctorListState state) {
-    if (state is DoctorListLoadingState || state is DoctorListInitialState) {
+  Widget _buildContent(BuildContext context, DoctorListsState state) {
+    if (state is DoctorListListLoadingState) {
       return const Center(child: LoaderWidget());
     }
 
-    if (state is DoctorListErrorState) {
+    if (state is DoctorListErrorState && getUpdatedData.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -411,24 +425,18 @@ class _DoctorListScreenWithBlocState
             SizedBox(height: 12.h),
             Text(
               state.isLocalizationKey
-                  ? context.translate(state.errorMessage)
-                  : state.errorMessage,
+                  ? context.translate(state.errorMassage)
+                  : state.errorMassage,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.labelSubtitle,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.labelSubtitle),
             ),
             SizedBox(height: 16.h),
             SizedBox(
               width: 140.w,
               child: AppElevatedButton.withTitle(
                 onPressed: () {
-                  context.read<DoctorListBloc>().add(
-                        FetchSpecialtyDoctorsEvent(
-                          specialtyId: widget.specialtyId,
-                        ),
-                      );
+                  _resetPaging();
+                  _getDoctorListsApiEvent();
                 },
                 title: context.translate(LocalizationKeys.retry),
               ),
@@ -438,78 +446,96 @@ class _DoctorListScreenWithBlocState
       );
     }
 
-    if (state is DoctorListLoadedState) {
-      if (state.displayedDoctors.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.person_search_rounded,
-                color: const Color(0xFF94A3B8),
-                size: 56.r,
+    if (empty || (state is DoctorListsLoadedState && getUpdatedData.isEmpty)) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_search_rounded,
+              color: AppColors.textSecondary,
+              size: 56.r,
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              context.translate(LocalizationKeys.noDoctorsFound),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppColors.labelSubtitle,
+                fontWeight: FontWeight.w500,
               ),
-              SizedBox(height: 12.h),
-              Text(
-                context.translate(LocalizationKeys.noDoctorsFound),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.labelSubtitle,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              if (state.filter.hasActiveFilters ||
-                  state.searchQuery.isNotEmpty) ...[
-                SizedBox(height: 16.h),
-                TextButton(
-                  onPressed: () {
-                    _searchController.clear();
-                    context.read<DoctorListBloc>()
-                      ..add(const SearchDoctorsEvent(''))
-                      ..add(const ResetFilterEvent());
-                  },
-                  child: Text(
-                    context.translate(LocalizationKeys.clearAll),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.colorPrimary,
-                    ),
+            ),
+            if (currentFilter.hasActiveFilters ||
+                sendModel.pagination.searchText.isNotEmpty) ...[
+              SizedBox(height: 16.h),
+              TextButton(
+                onPressed: () {
+                  _searchController.clear();
+                  currentFilter = DoctorFilterModel.initial;
+                  sendModel.governorateId = null;
+                  sendModel.areaId = null;
+                  sendModel.insuranceCompanyId = null;
+                  sendModel.doctorType = null;
+                  sendModel.minFee = null;
+                  sendModel.maxFee = null;
+                  sendModel.dateFilter = null;
+                  sendModel.pagination.searchText = '';
+                  _resetPaging();
+                  _getDoctorListsApiEvent();
+                },
+                child: Text(
+                  context.translate(LocalizationKeys.clearAll),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.colorPrimary,
                   ),
                 ),
-              ],
+              ),
             ],
-          ),
-        );
-      }
-
-      return ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
+          ],
         ),
-        padding: EdgeInsets.only(bottom: 24.h),
-        itemCount: state.displayedDoctors.length,
-        itemBuilder: (context, index) {
-          final doctor = state.displayedDoctors[index];
-          final isFav = state.favoriteDoctorIds.contains(doctor.id);
-          return DoctorCardWidget(
-            doctor: doctor,
-            isFavorite: isFav,
-            onFavoriteTap: () {
-              context.read<DoctorListBloc>().add(
-                    ToggleFavoriteDoctorEvent(doctor.id),
-                  );
-            },
-            onBookTap: () {
-              // Action for booking flow
-            },
-          );
-        },
       );
     }
 
-    return const SizedBox.shrink();
+    return PagingSwipeToRefreshListWidget(
+      reachedEndOfScroll: () {
+        if (shouldLoadMore) {
+          startPaginationLoading();
+          _getDoctorListsApiEvent();
+        } else if (shouldShowNoMoreData) {
+          lastPageCallback();
+        }
+      },
+      listPadding: EdgeInsets.only(bottom: 24.h),
+      itemClickable: false,
+      itemWidget: (int index) {
+        final doctor = getUpdatedData[index];
+        final isFav = (state is DoctorListsLoadedState)
+            ? state.favoriteDoctorIds.contains(doctor.id)
+            : false;
+        return DoctorCardWidget(
+          doctor: doctor,
+          isFavorite: isFav,
+          onFavoriteTap: () {
+            currentBloc.add(ToggleFavoriteDoctorEvent(doctor.id));
+          },
+          onBookTap: () {
+            DoctorDetailsScreen.open(
+              context,
+              doctorId: doctor.id,
+              consultationFee: doctor.consultationFee.toDouble(),
+            );
+          },
+        );
+      },
+      swipedToRefresh: () {
+        _resetPaging();
+        _getDoctorListsApiEvent();
+      },
+      listLength: getUpdatedData.length,
+      showPagingLoader: currentLoadingState,
+    );
   }
 }
-

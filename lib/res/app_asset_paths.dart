@@ -15,4 +15,7 @@ abstract final class AppAssetPaths {
   static const filesIcon = "assets/icons/files_ic.svg";
   static const cameraIcon = "assets/icons/camera_ic.svg";
   static const galleryIcon = "assets/icons/gallery_ic.svg";
+  static const clinicIcon = "assets/icons/clinic_ic.svg";
+  static const filterIcon = "assets/icons/filter_ic.svg";
+  static const locationIcon = "assets/icons/location_ic.svg";
 }

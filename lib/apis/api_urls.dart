@@ -9,6 +9,18 @@ class ApiUrls {
   static String specialtyDoctors(String specialtyId) =>
       "/api/medical-specialties/$specialtyId/doctors";
 
+  /// Doctors
+  static String doctorProfile(String doctorId) => "/api/doctors/$doctorId";
+  static String doctorReviews(String doctorId) =>
+      "/api/doctors/$doctorId/reviews";
+
+  /// Lookups / Filters
+  static const insuranceCompanies = "/api/insurance-companies";
+  static const governorates = "/api/governorates";
+
+  /// Addresses
+  static const userAddresses = "/api/patients/me/addresses";
+
   static const refreshToken = "/auth/refresh-token";
 
   /// Tasks

@@ -13,4 +13,5 @@ enum PreferencesKeys {
   refreshToken,
   position,
   gender,
+  address
 }

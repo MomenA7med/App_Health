@@ -88,6 +88,22 @@ Do not refactor unrelated code.
 
 Implement the feature.
 
+### Colors & Styling (AppColors)
+
+- Never write hardcoded colors directly in the code or widgets (no `Color(0xFF...)` in UI files).
+- All colors must exist and be defined in `AppColors` (`lib/res/app_colors.dart`).
+- When adding a new color:
+  1. Name the color using: https://chir.ag/projects/name-that-color/
+  2. Define it as a private constant in `AppColors`:
+     ```dart
+     static const Color _hippieBlue = Color(0xff50A0A4);
+     ```
+  3. Define the public / semantic constant:
+     ```dart
+     static const colorPrimary = _hippieBlue;
+     ```
+  4. Use `AppColors.<colorConstant>` in the screens and widgets.
+
 Make sure to handle:
 
 - Loading state
@@ -108,6 +124,8 @@ The feature is NOT complete until all applicable checks pass.
 ### UI
 
 - [ ] UI matches the Figma design.
+- [ ] No hardcoded colors in UI code. All colors are defined in `AppColors`.
+- [ ] New colors in `AppColors` named via https://chir.ag/projects/name-that-color/ (`_colorName` -> public constant) and used in screens.
 - [ ] Existing design system components are reused.
 - [ ] Loading state handled.
 - [ ] Error state handled.

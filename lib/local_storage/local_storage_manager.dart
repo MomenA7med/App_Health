@@ -48,6 +48,10 @@ class LocalStorageManager {
     return await LocalStorageUtils.getString(PreferencesKeys.accessToken.name);
   }
 
+  Future<String?> getAddress() async {
+    return await LocalStorageUtils.getString(PreferencesKeys.address.name);
+  }
+
   Future<String?> getRefreshToken() async {
     return await LocalStorageUtils.getString(PreferencesKeys.refreshToken.name);
   }

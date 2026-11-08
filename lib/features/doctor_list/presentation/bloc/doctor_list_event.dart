@@ -1,63 +1,36 @@
 import 'package:equatable/equatable.dart';
-import 'package:app_health/features/doctor_list/data/models/doctor_filter_model.dart';
+import 'package:app_health/features/doctor_list/data/models/doctor_list_send_model.dart';
 
-abstract class DoctorListEvent extends Equatable {
-  const DoctorListEvent();
-
+abstract class DoctorListsEvent extends Equatable {
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [identityHashCode(this)];
 }
 
-class FetchSpecialtyDoctorsEvent extends DoctorListEvent {
-  final String specialtyId;
-  final bool isRefresh;
+class GetDoctorListsApiEvent extends DoctorListsEvent {
+  final DoctorListSendModel sendModel;
 
-  const FetchSpecialtyDoctorsEvent({
-    required this.specialtyId,
-    this.isRefresh = false,
-  });
+  GetDoctorListsApiEvent({required this.sendModel});
 
+  bool isFirstLoad() => (sendModel.pagination.pageNumber == 1) ? true : false;
+}
+
+class NoMoreDataToLoadEvent extends DoctorListsEvent {
   @override
-  List<Object?> get props => [specialtyId, isRefresh];
+  List<Object> get props => [];
 }
 
-class SearchDoctorsEvent extends DoctorListEvent {
-  final String query;
+class ChangeSearchEvent extends DoctorListsEvent {
+  final String searchText;
 
-  const SearchDoctorsEvent(this.query);
-
-  @override
-  List<Object?> get props => [query];
+  ChangeSearchEvent(this.searchText);
 }
 
-class ApplyFilterEvent extends DoctorListEvent {
-  final DoctorFilterModel filter;
-
-  const ApplyFilterEvent(this.filter);
-
-  @override
-  List<Object?> get props => [filter];
-}
-
-class ResetFilterEvent extends DoctorListEvent {
-  const ResetFilterEvent();
-}
-
-class ChangeSortOptionEvent extends DoctorListEvent {
-  final DoctorSortOption sortOption;
-
-  const ChangeSortOptionEvent(this.sortOption);
-
-  @override
-  List<Object?> get props => [sortOption];
-}
-
-class ToggleFavoriteDoctorEvent extends DoctorListEvent {
+class ToggleFavoriteDoctorEvent extends DoctorListsEvent {
   final String doctorId;
 
-  const ToggleFavoriteDoctorEvent(this.doctorId);
-
-  @override
-  List<Object?> get props => [doctorId];
+  ToggleFavoriteDoctorEvent(this.doctorId);
 }
 
+// Aliases for compatibility
+typedef DoctorListEvent = DoctorListsEvent;
+typedef LoadMoreDoctorsEvent = NoMoreDataToLoadEvent;

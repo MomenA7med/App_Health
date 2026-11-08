@@ -65,6 +65,13 @@ class LoginLocaleManager {
         userMangers.setProfileImageUrl(profile.profilePhotoUrl!);
       }
 
+      // Save address
+      if (profile.address != null &&
+          profile.address!.isNotEmpty) {
+        await preferencesManager.setAddress(profile.address!);
+        userMangers.setAddress(profile.address!);
+      }
+
       // Save profile JSON
       await PreferencesUtils.setString(
         PreferencesKeys.userObject.name,

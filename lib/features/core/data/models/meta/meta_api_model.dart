@@ -1,7 +1,8 @@
 class MetaApiModel {
   final int currentPage;
   final int totalPages;
-  MetaApiModel({required this.currentPage, required this.totalPages});
+  final int total;
+  MetaApiModel({required this.currentPage, required this.totalPages, required this.total});
 
   factory MetaApiModel.fromJson(Map<String, dynamic> json) {
     int totalPages = 0;
@@ -14,11 +15,15 @@ class MetaApiModel {
       }
     }
     return MetaApiModel(
-      currentPage: json['pageNumber'] as int? ?? 0,
+      currentPage:
+          (json['page'] as num?)?.toInt() ??
+          (json['pageNumber'] as num?)?.toInt() ??
+          0,
       totalPages: totalPages,
+      total: (json['totalCount'] as num?)?.toInt() ?? 0,
     );
   }
   factory MetaApiModel.emptyOne() {
-    return MetaApiModel(currentPage: 0, totalPages: 0);
+    return MetaApiModel(currentPage: 0, totalPages: 0,total: 0);
   }
 }

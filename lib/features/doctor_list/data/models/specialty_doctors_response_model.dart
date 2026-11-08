@@ -1,3 +1,5 @@
+import 'package:app_health/features/core/domain/entities/meta/meta_ui_model.dart';
+
 class SpecialtyDoctorsResponseModel {
   final bool success;
   final String code;
@@ -32,6 +34,15 @@ class SpecialtyDoctorsResponseModel {
       'data': data?.toJson(),
     };
   }
+
+  MetaUiModel get metaUiModel => data?.metaUiModel ?? MetaUiModel.emptyOne();
+  List<DoctorModel> get doctors => data?.items ?? [];
+  List<DoctorModel> get doctorList => doctors;
+  bool get hasNext => data?.hasNext ?? false;
+  bool get hasPrevious => data?.hasPrevious ?? false;
+  int get totalPages => data?.totalPages ?? 0;
+  int get currentPage => data?.page ?? 1;
+  int get totalCount => data?.totalCount ?? 0;
 }
 
 class SpecialtyDoctorsDataModel {
@@ -46,6 +57,22 @@ class SpecialtyDoctorsDataModel {
     required this.pageSize,
     required this.totalCount,
   });
+
+  MetaUiModel get metaUiModel => MetaUiModel(
+        currentPage: page,
+        totalPages: totalPages,
+      );
+
+  int get totalPages =>
+      pageSize > 0 ? (totalCount / pageSize).ceil() : 0;
+
+  bool get hasNext => page < totalPages;
+
+  bool get hasPrevious => page > 1;
+
+  bool get isFirstPage => page <= 1;
+
+  bool get isLastPage => !hasNext;
 
   factory SpecialtyDoctorsDataModel.fromJson(Map<String, dynamic> json) {
     return SpecialtyDoctorsDataModel(
@@ -85,6 +112,8 @@ class DoctorModel {
   final String? nextAvailableSlot;
   final String? nextAvailableDate;
   final String? imageUrl;
+  final bool acceptsPatientInsurance;
+  final bool isFavorite;
 
   DoctorModel({
     required this.id,
@@ -102,6 +131,8 @@ class DoctorModel {
     this.nextAvailableSlot,
     this.nextAvailableDate,
     this.imageUrl,
+    this.acceptsPatientInsurance = false,
+    this.isFavorite = false,
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
@@ -121,6 +152,8 @@ class DoctorModel {
       nextAvailableSlot: json['nextAvailableSlot'] as String?,
       nextAvailableDate: json['nextAvailableDate'] as String?,
       imageUrl: json['imageUrl'] as String?,
+      acceptsPatientInsurance: json['acceptsPatientInsurance'] ?? false,
+      isFavorite: json['isFavorite'] ?? false,
     );
   }
 

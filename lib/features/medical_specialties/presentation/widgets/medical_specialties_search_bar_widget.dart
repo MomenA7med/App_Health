@@ -22,7 +22,7 @@ class MedicalSpecialtiesSearchBarWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+        border: Border.all(color: AppColors.borderLight, width: 1.2),
       ),
       child: TextField(
         controller: controller,
@@ -36,12 +36,12 @@ class MedicalSpecialtiesSearchBarWidget extends StatelessWidget {
           hintText: context.translate(LocalizationKeys.searchSpecialtyHint),
           hintStyle: TextStyle(
             fontSize: 14.sp,
-            color: const Color(0xFF94A3B8),
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.normal,
           ),
           prefixIcon: const Icon(
             Icons.search,
-            color: Color(0xFF64748B),
+            color: AppColors.textMuted,
             size: 22,
           ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
@@ -51,7 +51,7 @@ class MedicalSpecialtiesSearchBarWidget extends StatelessWidget {
                 return IconButton(
                   icon: const Icon(
                     Icons.close,
-                    color: Color(0xFF94A3B8),
+                    color: AppColors.textSecondary,
                     size: 18,
                   ),
                   onPressed: onClear,

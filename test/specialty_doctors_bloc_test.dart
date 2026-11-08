@@ -1,23 +1,49 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_health/apis/errors/error_api_model.dart';
-import 'package:app_health/features/doctor_list/data/models/doctor_filter_model.dart';
+import 'package:app_health/features/core/data/models/meta/meta_api_model.dart';
+import 'package:app_health/features/core/data/models/meta/paging_send_model.dart';
+import 'package:app_health/features/doctor_list/data/models/doctor_list_send_model.dart';
+import 'package:app_health/features/doctor_list/data/models/doctor_lists_api_model_successful_response.dart';
+import 'package:app_health/features/doctor_list/data/models/governorate_model.dart';
+import 'package:app_health/features/doctor_list/data/models/insurance_company_model.dart';
 import 'package:app_health/features/doctor_list/data/models/specialty_doctors_response_model.dart';
 import 'package:app_health/features/doctor_list/domain/repositories/base_doctor_list_repository.dart';
-import 'package:app_health/features/doctor_list/domain/usecases/get_specialty_doctors_usecase.dart';
+import 'package:app_health/features/doctor_list/domain/usecases/get_doctor_list_use_case.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_bloc.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_event.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_state.dart';
 
-class FakeSpecialtyDoctorsRepository
-    implements BaseDoctorListRepository {
+class FakeDoctorListRepository implements BaseDoctorListRepository {
   bool shouldFail = false;
   List<DoctorModel> doctors = [];
+  int totalCountOverride = 0;
+  DoctorListSendModel? lastSendModel;
 
   @override
-  Future<SpecialtyDoctorsResponseModel> getSpecialtyDoctors({
-    required String specialtyId,
-    Map<String, dynamic>? queryParameters,
-  }) async {
+  Future<InsuranceCompaniesResponseModel> getInsuranceCompaniesApi() async {
+    return const InsuranceCompaniesResponseModel(
+      success: true,
+      code: 'OK',
+      message: 'OK',
+      data: [],
+    );
+  }
+
+  @override
+  Future<GovernoratesResponseModel> getGovernoratesApi() async {
+    return const GovernoratesResponseModel(
+      success: true,
+      code: 'OK',
+      message: 'OK',
+      data: [],
+    );
+  }
+
+  @override
+  Future<DoctorListsApiModelSuccessfulResponse> getDoctorListsApi(
+    DoctorListSendModel sendModel,
+  ) async {
+    lastSendModel = sendModel;
     if (shouldFail) {
       throw ErrorApiModel(
         isMessageLocalizationKey: false,
@@ -25,24 +51,27 @@ class FakeSpecialtyDoctorsRepository
         code: 500,
       );
     }
-    return SpecialtyDoctorsResponseModel(
-      success: true,
-      code: 'DOCTORS_RETRIEVED',
-      message: 'Success',
-      data: SpecialtyDoctorsDataModel(
-        items: doctors,
-        page: 1,
-        pageSize: 20,
-        totalCount: doctors.length,
+    final int totalCount = totalCountOverride > 0
+        ? totalCountOverride
+        : doctors.length;
+    final int pageSize = sendModel.pagination.pageSize;
+    final int totalPages = pageSize > 0 ? (totalCount / pageSize).ceil() : 0;
+
+    return DoctorListsApiModelSuccessfulResponse(
+      doctors,
+      MetaApiModel(
+        currentPage: sendModel.pagination.pageNumber,
+        totalPages: totalPages,
+        total: totalCount,
       ),
     );
   }
 }
 
 void main() {
-  late FakeSpecialtyDoctorsRepository fakeRepository;
-  late GetSpecialtyDoctorsUseCase useCase;
-  late DoctorListBloc bloc;
+  late FakeDoctorListRepository fakeRepository;
+  late GetDoctorListsUseCase useCase;
+  late DoctorListsBloc bloc;
 
   final sampleDoctors = [
     DoctorModel(
@@ -96,249 +125,123 @@ void main() {
   ];
 
   setUp(() {
-    fakeRepository = FakeSpecialtyDoctorsRepository();
+    fakeRepository = FakeDoctorListRepository();
     fakeRepository.doctors = List.from(sampleDoctors);
-    useCase = GetSpecialtyDoctorsUseCase(fakeRepository);
-    bloc = DoctorListBloc(getSpecialtyDoctorsUseCase: useCase);
+    useCase = GetDoctorListsUseCase(fakeRepository);
+    bloc = DoctorListsBloc(getDoctorListsUseCase: useCase);
   });
 
   tearDown(() {
     bloc.close();
   });
 
-  group('DoctorListBloc Tests', () {
-    test('initial state is DoctorListInitialState', () {
-      expect(bloc.state, const DoctorListInitialState());
+  group('DoctorListsBloc Tests (booking_list structure)', () {
+    test('initial state is DoctorListsInitial', () {
+      expect(bloc.state, isA<DoctorListsInitial>());
     });
 
-    test('emits [Loading, Loaded] when fetching doctors succeeds', () async {
+    test('emits [Loading, Loaded] when fetching first page succeeds', () async {
+      final sendModel = DoctorListSendModel(
+        specialtyId: 'spec-1',
+        pagination: PagingListSendModel(pageNumber: 1, pageSize: 20),
+      );
+
       final expectedStates = [
-        const DoctorListLoadingState(),
-        predicate<DoctorListState>((state) {
-          if (state is DoctorListLoadedState) {
-            return state.allDoctors.length == 3 &&
-                state.displayedDoctors.length == 3 &&
-                state.sortOption == DoctorSortOption.nearest;
+        isA<DoctorListListLoadingState>(),
+        predicate<DoctorListsState>((state) {
+          if (state is DoctorListsLoadedState) {
+            return state.doctorList.length == 3 &&
+                state.metaUiModel.currentPage == 1;
           }
           return false;
         }),
       ];
 
       expectLater(bloc.stream, emitsInOrder(expectedStates));
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
+      bloc.add(GetDoctorListsApiEvent(sendModel: sendModel));
     });
+
+    test(
+      'emits [PagingLoading, Loaded] when fetching subsequent page',
+      () async {
+        final sendModel = DoctorListSendModel(
+          specialtyId: 'spec-1',
+          pagination: PagingListSendModel(pageNumber: 2, pageSize: 20),
+        );
+
+        final expectedStates = [
+          isA<DoctorListLoadingAsPagingState>(),
+          predicate<DoctorListsState>((state) {
+            if (state is DoctorListsLoadedState) {
+              return state.metaUiModel.currentPage == 2;
+            }
+            return false;
+          }),
+        ];
+
+        expectLater(bloc.stream, emitsInOrder(expectedStates));
+        bloc.add(GetDoctorListsApiEvent(sendModel: sendModel));
+      },
+    );
 
     test('emits [Loading, Error] when fetching doctors fails', () async {
       fakeRepository.shouldFail = true;
 
+      final sendModel = DoctorListSendModel(
+        specialtyId: 'spec-1',
+        pagination: PagingListSendModel(pageNumber: 1, pageSize: 20),
+      );
+
       final expectedStates = [
-        const DoctorListLoadingState(),
-        predicate<DoctorListState>((state) {
+        isA<DoctorListListLoadingState>(),
+        predicate<DoctorListsState>((state) {
           if (state is DoctorListErrorState) {
-            return state.errorMessage == 'Network error occurred';
+            return state.errorMassage == 'Network error occurred';
           }
           return false;
         }),
       ];
 
       expectLater(bloc.stream, emitsInOrder(expectedStates));
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
+      bloc.add(GetDoctorListsApiEvent(sendModel: sendModel));
     });
 
-    test('filters doctors correctly by search query', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
+    test('toggles favorite doctor correctly', () async {
+      final sendModel = DoctorListSendModel(
+        specialtyId: 'spec-1',
+        pagination: PagingListSendModel(pageNumber: 1, pageSize: 20),
+      );
+      bloc.add(GetDoctorListsApiEvent(sendModel: sendModel));
+
       await expectLater(
         bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
+        emitsThrough(isA<DoctorListsLoadedState>()),
       );
 
-      bloc.add(const SearchDoctorsEvent('سارة'));
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.length == 1 &&
-                state.displayedDoctors.first.name == 'د. سارة محمود';
-          }),
-        ),
-      );
-    });
-
-    test('filters doctors correctly by gender', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(
-        const ApplyFilterEvent(
-          DoctorFilterModel(gender: 'female'),
-        ),
-      );
-
+      bloc.add(ToggleFavoriteDoctorEvent('1'));
       await expectLater(
         bloc.stream,
         emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.length == 1 &&
-                state.displayedDoctors.first.gender == 'Female';
-          }),
-        ),
-      );
-    });
-
-    test('filters doctors correctly by price range', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(
-        const ApplyFilterEvent(
-          DoctorFilterModel(minPrice: 300, maxPrice: 400),
-        ),
-      );
-
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.length == 1 &&
-                state.displayedDoctors.first.consultationFee == 350;
-          }),
-        ),
-      );
-    });
-
-    test('filters doctors correctly by date (today)', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(
-        const ApplyFilterEvent(
-          DoctorFilterModel(consultationDate: 'today'),
-        ),
-      );
-
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.length == 2;
-          }),
-        ),
-      );
-    });
-
-    test('sorts doctors correctly by price low to high and high to low', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(const ChangeSortOptionEvent(DoctorSortOption.priceLowToHigh));
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.first.consultationFee == 280 &&
-                state.displayedDoctors.last.consultationFee == 450;
-          }),
-        ),
-      );
-
-      bloc.add(const ChangeSortOptionEvent(DoctorSortOption.priceHighToLow));
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.first.consultationFee == 450 &&
-                state.displayedDoctors.last.consultationFee == 280;
-          }),
-        ),
-      );
-    });
-
-    test('sorts doctors correctly by highest rated', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(const ChangeSortOptionEvent(DoctorSortOption.highestRated));
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.first.ratingAverage == 4.9;
-          }),
-        ),
-      );
-    });
-
-    test('toggles favorite doctor id properly', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(const ToggleFavoriteDoctorEvent('1'));
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
+          predicate<DoctorListsLoadedState>((state) {
             return state.favoriteDoctorIds.contains('1');
           }),
         ),
       );
 
-      bloc.add(const ToggleFavoriteDoctorEvent('1'));
+      bloc.add(ToggleFavoriteDoctorEvent('1'));
       await expectLater(
         bloc.stream,
         emits(
-          predicate<DoctorListLoadedState>((state) {
+          predicate<DoctorListsLoadedState>((state) {
             return !state.favoriteDoctorIds.contains('1');
           }),
         ),
       );
     });
 
-    test('resets filter back to initial', () async {
-      bloc.add(const FetchSpecialtyDoctorsEvent(specialtyId: 'spec-1'));
-      await expectLater(
-        bloc.stream,
-        emitsThrough(isA<DoctorListLoadedState>()),
-      );
-
-      bloc.add(const ApplyFilterEvent(DoctorFilterModel(gender: 'female')));
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.length == 1;
-          }),
-        ),
-      );
-
-      bloc.add(const ResetFilterEvent());
-      await expectLater(
-        bloc.stream,
-        emits(
-          predicate<DoctorListLoadedState>((state) {
-            return state.displayedDoctors.length == 3 &&
-                state.filter == DoctorFilterModel.initial;
-          }),
-        ),
-      );
+    test('emits NoMoreDataToLoadState on NoMoreDataToLoadEvent', () async {
+      expectLater(bloc.stream, emits(isA<NoMoreDataToLoadState>()));
+      bloc.add(NoMoreDataToLoadEvent());
     });
   });
 }
-

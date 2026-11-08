@@ -7,6 +7,7 @@ import 'package:app_health/features/doctor_list/data/models/specialty_doctors_re
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_card_widget.dart';
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_search_bar_widget.dart';
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_sort_bottom_sheet_widget.dart';
+import 'package:app_health/features/widgets/pagination_widgets/paging_swipe_to_refresh_list_widget.dart';
 import 'package:app_health/utils/locale/app_localization.dart';
 import 'package:app_health/utils/locale/app_localization_keys.dart';
 
@@ -47,6 +48,7 @@ class _FakeAppLocalizations extends AppLocalizations {
     LocalizationKeys.bookNow: 'احجز الآن',
     LocalizationKeys.sortDoctors: 'ترتيب الدكاترة',
     LocalizationKeys.applySorting: 'تطبيق الترتيب',
+    LocalizationKeys.showDetails: 'عرض التفاصيل',
   };
 
   @override
@@ -88,6 +90,7 @@ void main() {
       nextAvailableSlot: 'اليوم، ٣:٣٠ مساءً',
       nextAvailableDate: '2026-11-01',
       imageUrl: null,
+      acceptsPatientInsurance: true,
     );
 
     testWidgets('DoctorCardWidget renders doctor details and responds to actions', (
@@ -121,15 +124,15 @@ void main() {
       expect(find.text('ج.م'), findsOneWidget);
       expect(find.text('اليوم، ٣:٣٠ مساءً'), findsOneWidget);
       expect(find.text('يقبل تأمينك'), findsOneWidget);
-      expect(find.text('احجز الآن'), findsOneWidget);
+      expect(find.text('عرض التفاصيل'), findsOneWidget);
       expect(find.text('ع أ'), findsOneWidget); // Initials avatar
 
       // Tap favorite
       await tester.tap(find.byIcon(Icons.favorite_border_rounded));
       expect(favTapped, isTrue);
 
-      // Tap book now
-      await tester.tap(find.text('احجز الآن'));
+      // Tap book now / show details
+      await tester.tap(find.text('عرض التفاصيل'));
       expect(bookTapped, isTrue);
     });
 
@@ -159,6 +162,7 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'عمر');
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
 
       expect(changedText, 'عمر');
@@ -168,6 +172,43 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(cleared, isTrue);
+    });
+
+    testWidgets('DoctorSearchBarWidget debounces user input by 500ms', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      int callCount = 0;
+      String lastText = '';
+
+      await tester.pumpWidget(
+        wrapWithMaterial(
+          DoctorSearchBarWidget(
+            controller: controller,
+            onChanged: (val) {
+              callCount++;
+              lastText = val;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'ع');
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(callCount, 0);
+
+      await tester.enterText(find.byType(TextField), 'عم');
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(callCount, 0);
+
+      await tester.enterText(find.byType(TextField), 'عمر');
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(callCount, 0);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(callCount, 1);
+      expect(lastText, 'عمر');
     });
 
     testWidgets('DoctorSortBottomSheetWidget renders sort options and applies selection', (
@@ -202,6 +243,30 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(appliedOption, DoctorSortOption.highestRated);
+    });
+
+    testWidgets('PagingSwipeToRefreshListWidget renders items correctly', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapWithMaterial(
+          SizedBox(
+            height: 600,
+            child: PagingSwipeToRefreshListWidget(
+              listLength: 1,
+              showPagingLoader: false,
+              itemClickable: false,
+              swipedToRefresh: () {},
+              reachedEndOfScroll: () {},
+              itemWidget: (index) => DoctorCardWidget(doctor: sampleDoctor),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PagingSwipeToRefreshListWidget), findsOneWidget);
+      expect(find.text('د. عمر أحمد'), findsOneWidget);
     });
   });
 }

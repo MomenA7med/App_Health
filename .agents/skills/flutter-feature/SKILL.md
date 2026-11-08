@@ -62,6 +62,8 @@ Implement in this order:
 8. Tests
 
 Follow the existing project conventions.
+- Never hardcode colors in widgets. All colors must be defined in `AppColors`.
+- Name new colors in `AppColors` using https://chir.ag/projects/name-that-color/ (private `_colorName` mapped to semantic constant).
 
 ## Quality
 

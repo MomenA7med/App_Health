@@ -1,3 +1,4 @@
+import 'package:app_health/logic/user_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -74,7 +75,6 @@ class _MedicalSpecialtiesScreenWithBlocState
         backgroundColor: AppColors.appBarBackground,
         elevation: 0,
         centerTitle: true,
-
         title: Text(
           context.translate(LocalizationKeys.medicalSpecialties),
           style: TextStyle(
@@ -83,6 +83,14 @@ class _MedicalSpecialtiesScreenWithBlocState
             color: AppColors.buttonBlackTextColor,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await GetIt.I<UserMangers>().signOut();
+            },
+            icon: const Icon(Icons.logout_outlined),
+          ),
+        ],
       ),
       body: BlocConsumer<MedicalSpecialtiesBloc, MedicalSpecialtiesState>(
         listener: (context, state) {
@@ -184,7 +192,7 @@ class _MedicalSpecialtiesScreenWithBlocState
             children: [
               Icon(
                 Icons.search_off_rounded,
-                color: const Color(0xFF94A3B8),
+                color: AppColors.textSecondary,
                 size: 56.r,
               ),
               SizedBox(height: 12.h),

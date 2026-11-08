@@ -36,6 +36,8 @@ trigger: always_on
 - When Figma is provided, use it as the source of truth.
 - Reuse existing design system components.
 - Reuse existing colors, typography and spacing.
+- Never hardcode colors in code/widgets (no `Color(0xFF...)`). All colors must be in `AppColors`.
+- When adding colors to `AppColors`, name them from https://chir.ag/projects/name-that-color/ (`static const Color _colorName = Color(...); static const colorPrimary = _colorName;`).
 - Do not invent UI components when an existing component can be reused.
 - Handle loading, error and empty states.
 

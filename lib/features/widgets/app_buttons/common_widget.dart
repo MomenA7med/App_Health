@@ -44,7 +44,7 @@ Widget labelIconWidget(
 }
 
 RoundedRectangleBorder buttonShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.circular(10),
+  borderRadius: BorderRadius.circular(100),
 );
 EdgeInsets buttonPadding = const EdgeInsets.symmetric(
   horizontal: 15,

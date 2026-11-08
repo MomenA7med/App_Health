@@ -1,282 +1,68 @@
 import 'dart:async';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:app_health/features/doctor_list/data/models/doctor_filter_model.dart';
-import 'package:app_health/features/doctor_list/data/models/specialty_doctors_response_model.dart';
-import 'package:app_health/features/doctor_list/domain/usecases/get_specialty_doctors_usecase.dart';
+import 'package:app_health/apis/errors/error_api_model.dart';
+import 'package:app_health/features/doctor_list/domain/entities/doctor_lists_ui_response.dart';
+import 'package:app_health/features/doctor_list/domain/usecases/get_doctor_list_use_case.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_event.dart';
 import 'package:app_health/features/doctor_list/presentation/bloc/doctor_list_state.dart';
 
-class DoctorListBloc extends Bloc<DoctorListEvent, DoctorListState> {
-  final GetSpecialtyDoctorsUseCase getSpecialtyDoctorsUseCase;
+class DoctorListsBloc extends Bloc<DoctorListsEvent, DoctorListsState> {
+  final GetDoctorListsUseCase getDoctorListsUseCase;
+  Set<String> _favoriteDoctorIds = {};
 
-  DoctorListBloc({required this.getSpecialtyDoctorsUseCase})
-      : super(const DoctorListInitialState()) {
-    on<FetchSpecialtyDoctorsEvent>(_onFetchSpecialtyDoctors);
-    on<SearchDoctorsEvent>(_onSearchDoctors);
-    on<ApplyFilterEvent>(_onApplyFilter);
-    on<ResetFilterEvent>(_onResetFilter);
-    on<ChangeSortOptionEvent>(_onChangeSortOption);
-    on<ToggleFavoriteDoctorEvent>(_onToggleFavoriteDoctor);
+  DoctorListsBloc({
+    required this.getDoctorListsUseCase,
+  }) : super(DoctorListsInitial()) {
+    on<GetDoctorListsApiEvent>(_getDoctorListsApiEvent);
+    on<NoMoreDataToLoadEvent>(_noMoreDataToLoadEvent);
+    on<ToggleFavoriteDoctorEvent>(_toggleFavoriteDoctorEvent);
+    on<ChangeSearchEvent>(_changeSearchEvent);
   }
 
-  FutureOr<void> _onFetchSpecialtyDoctors(
-    FetchSpecialtyDoctorsEvent event,
-    Emitter<DoctorListState> emit,
-  ) async {
-    final currentState = state;
-    Set<String> previousFavorites = {};
-    DoctorFilterModel previousFilter = DoctorFilterModel.initial;
-    DoctorSortOption previousSort = DoctorSortOption.nearest;
-    String previousSearch = '';
+  FutureOr<void> _getDoctorListsApiEvent(
+      GetDoctorListsApiEvent event, Emitter<DoctorListsState> emit) async {
+    emit((event.isFirstLoad())
+        ? DoctorListListLoadingState()
+        : DoctorListLoadingAsPagingState());
 
-    if (currentState is DoctorListLoadedState) {
-      previousFavorites = currentState.favoriteDoctorIds;
-      previousFilter = currentState.filter;
-      previousSort = currentState.sortOption;
-      previousSearch = currentState.searchQuery;
-    }
+    Either<ErrorApiModel, DoctorListsUiResponse> response =
+        await getDoctorListsUseCase(event.sendModel);
 
-    if (!event.isRefresh) {
-      emit(const DoctorListLoadingState());
-    }
-
-    final result = await getSpecialtyDoctorsUseCase(
-      GetSpecialtyDoctorsParams(specialtyId: event.specialtyId),
-    );
-
-    result.fold(
-      (error) {
-        emit(
-          DoctorListErrorState(
-            errorMessage: error.message,
-            isLocalizationKey: error.isMessageLocalizationKey,
-          ),
-        );
-      },
-      (response) {
-        final items = response.data?.items ?? [];
-        final totalCount = response.data?.totalCount ?? items.length;
-
-        final displayed = applyFilterAndSort(
-          doctors: items,
-          filter: previousFilter,
-          sortOption: previousSort,
-          searchQuery: previousSearch,
-        );
-
-        emit(
-          DoctorListLoadedState(
-            specialtyId: event.specialtyId,
-            allDoctors: items,
-            displayedDoctors: displayed,
-            filter: previousFilter,
-            sortOption: previousSort,
-            searchQuery: previousSearch,
-            favoriteDoctorIds: previousFavorites,
-            totalCount: totalCount,
-          ),
-        );
-      },
-    );
+    emit(response.fold(
+      (failure) => DoctorListErrorState(
+          failure.message, failure.isMessageLocalizationKey),
+      (state) => DoctorListsLoadedState(state,
+          favoriteDoctorIds: _favoriteDoctorIds),
+    ));
   }
 
-  FutureOr<void> _onSearchDoctors(
-    SearchDoctorsEvent event,
-    Emitter<DoctorListState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is DoctorListLoadedState) {
-      final updatedDisplayed = applyFilterAndSort(
-        doctors: currentState.allDoctors,
-        filter: currentState.filter,
-        sortOption: currentState.sortOption,
-        searchQuery: event.query,
-      );
-
-      emit(
-        currentState.copyWith(
-          searchQuery: event.query,
-          displayedDoctors: updatedDisplayed,
-        ),
-      );
-    }
+  FutureOr<void> _noMoreDataToLoadEvent(
+      NoMoreDataToLoadEvent event, Emitter<DoctorListsState> emit) {
+    emit(NoMoreDataToLoadState());
   }
 
-  FutureOr<void> _onApplyFilter(
-    ApplyFilterEvent event,
-    Emitter<DoctorListState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is DoctorListLoadedState) {
-      final updatedDisplayed = applyFilterAndSort(
-        doctors: currentState.allDoctors,
-        filter: event.filter,
-        sortOption: currentState.sortOption,
-        searchQuery: currentState.searchQuery,
-      );
-
-      emit(
-        currentState.copyWith(
-          filter: event.filter,
-          displayedDoctors: updatedDisplayed,
-        ),
-      );
-    }
+  FutureOr<void> _changeSearchEvent(
+      ChangeSearchEvent event, Emitter<DoctorListsState> emit) {
+    // Can be used if debounced search is listened
   }
 
-  FutureOr<void> _onResetFilter(
-    ResetFilterEvent event,
-    Emitter<DoctorListState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is DoctorListLoadedState) {
-      const resetFilter = DoctorFilterModel.initial;
-      final updatedDisplayed = applyFilterAndSort(
-        doctors: currentState.allDoctors,
-        filter: resetFilter,
-        sortOption: currentState.sortOption,
-        searchQuery: currentState.searchQuery,
-      );
-
-      emit(
-        currentState.copyWith(
-          filter: resetFilter,
-          displayedDoctors: updatedDisplayed,
-        ),
-      );
+  FutureOr<void> _toggleFavoriteDoctorEvent(
+      ToggleFavoriteDoctorEvent event, Emitter<DoctorListsState> emit) {
+    final updated = Set<String>.from(_favoriteDoctorIds);
+    if (updated.contains(event.doctorId)) {
+      updated.remove(event.doctorId);
+    } else {
+      updated.add(event.doctorId);
     }
-  }
-
-  FutureOr<void> _onChangeSortOption(
-    ChangeSortOptionEvent event,
-    Emitter<DoctorListState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is DoctorListLoadedState) {
-      final updatedDisplayed = applyFilterAndSort(
-        doctors: currentState.allDoctors,
-        filter: currentState.filter,
-        sortOption: event.sortOption,
-        searchQuery: currentState.searchQuery,
-      );
-
-      emit(
-        currentState.copyWith(
-          sortOption: event.sortOption,
-          displayedDoctors: updatedDisplayed,
-        ),
-      );
+    _favoriteDoctorIds = updated;
+    if (state is DoctorListsLoadedState) {
+      final loaded = state as DoctorListsLoadedState;
+      emit(DoctorListsLoadedState(loaded.doctorListUiResponse,
+          favoriteDoctorIds: _favoriteDoctorIds));
     }
-  }
-
-  FutureOr<void> _onToggleFavoriteDoctor(
-    ToggleFavoriteDoctorEvent event,
-    Emitter<DoctorListState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is DoctorListLoadedState) {
-      final updatedFavorites = Set<String>.from(currentState.favoriteDoctorIds);
-      if (updatedFavorites.contains(event.doctorId)) {
-        updatedFavorites.remove(event.doctorId);
-      } else {
-        updatedFavorites.add(event.doctorId);
-      }
-
-      emit(currentState.copyWith(favoriteDoctorIds: updatedFavorites));
-    }
-  }
-
-  static List<DoctorModel> applyFilterAndSort({
-    required List<DoctorModel> doctors,
-    required DoctorFilterModel filter,
-    required DoctorSortOption sortOption,
-    required String searchQuery,
-  }) {
-    List<DoctorModel> result = List<DoctorModel>.from(doctors);
-
-    // 1. Search Query
-    final trimmedSearch = searchQuery.trim().toLowerCase();
-    if (trimmedSearch.isNotEmpty) {
-      result = result.where((doctor) {
-        final name = doctor.name.toLowerCase();
-        final title = doctor.specializationTitle.toLowerCase();
-        final clinic = doctor.clinicName.toLowerCase();
-        final address = doctor.clinicAddress.toLowerCase();
-        final area = doctor.area.toLowerCase();
-        return name.contains(trimmedSearch) ||
-            title.contains(trimmedSearch) ||
-            clinic.contains(trimmedSearch) ||
-            address.contains(trimmedSearch) ||
-            area.contains(trimmedSearch);
-      }).toList();
-    }
-
-    // 2. Gender
-    if (filter.gender != null && filter.gender != 'all') {
-      if (filter.gender == 'male') {
-        result = result.where((d) => d.isMale).toList();
-      } else if (filter.gender == 'female') {
-        result = result.where((d) => d.isFemale).toList();
-      }
-    }
-
-    // 3. Price
-    if (filter.minPrice != null) {
-      result = result
-          .where((d) => d.consultationFee >= filter.minPrice!)
-          .toList();
-    }
-    if (filter.maxPrice != null) {
-      result = result
-          .where((d) => d.consultationFee <= filter.maxPrice!)
-          .toList();
-    }
-
-    // 4. Area / Location
-    if (filter.area != null && filter.area!.isNotEmpty && filter.area != 'all') {
-      final areaFilter = filter.area!.toLowerCase();
-      result = result.where((d) {
-        return d.area.toLowerCase().contains(areaFilter) ||
-            d.cityLocation.toLowerCase().contains(areaFilter);
-      }).toList();
-    }
-
-    // 5. Availability Date
-    if (filter.consultationDate != null && filter.consultationDate != 'any') {
-      if (filter.consultationDate == 'today') {
-        result = result.where((d) {
-          final slot = d.nextAvailableSlot?.toLowerCase() ?? '';
-          return slot.contains('اليوم') || slot.contains('today');
-        }).toList();
-      } else if (filter.consultationDate == 'tomorrow') {
-        result = result.where((d) {
-          final slot = d.nextAvailableSlot?.toLowerCase() ?? '';
-          return slot.contains('غداً') || slot.contains('tomorrow');
-        }).toList();
-      }
-    }
-
-    // 6. Sorting
-    switch (sortOption) {
-      case DoctorSortOption.nearest:
-        result.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
-        break;
-      case DoctorSortOption.highestRated:
-        result.sort((a, b) {
-          final cmp = b.ratingAverage.compareTo(a.ratingAverage);
-          if (cmp != 0) return cmp;
-          return b.totalReviews.compareTo(a.totalReviews);
-        });
-        break;
-      case DoctorSortOption.priceLowToHigh:
-        result.sort((a, b) => a.consultationFee.compareTo(b.consultationFee));
-        break;
-      case DoctorSortOption.priceHighToLow:
-        result.sort((a, b) => b.consultationFee.compareTo(a.consultationFee));
-        break;
-    }
-
-    return result;
   }
 }
 
+// Aliases for compatibility
+typedef DoctorListBloc = DoctorListsBloc;

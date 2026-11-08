@@ -17,7 +17,7 @@ class PagingListSendModel extends Equatable {
   Map<String, dynamic> toJson() => {
     'pageSize': pageSize,
     'pageIndex': pageNumber,
-    if (searchText.isNotNullOrNotEmpty) 'keyword': searchText,
+    if (searchText.isNotNullOrNotEmpty) 'search': searchText,
   };
 
   factory PagingListSendModel.fromPagingListUiModel(

@@ -1,3 +1,4 @@
+import 'package:app_health/res/app_asset_paths.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,6 +6,7 @@ import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/features/doctor_list/data/models/specialty_doctors_response_model.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/locale/app_localization_keys.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class DoctorCardWidget extends StatelessWidget {
   final DoctorModel doctor;
@@ -21,7 +23,8 @@ class DoctorCardWidget extends StatelessWidget {
   });
 
   Widget _buildAvatar() {
-    final hasImage = doctor.imageUrl != null && doctor.imageUrl!.trim().isNotEmpty;
+    final hasImage =
+        doctor.imageUrl != null && doctor.imageUrl!.trim().isNotEmpty;
 
     if (hasImage) {
       return ClipRRect(
@@ -53,7 +56,7 @@ class DoctorCardWidget extends StatelessWidget {
         doctor.initials,
         style: TextStyle(
           fontSize: 22.sp,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.colorPrimary,
         ),
       ),
@@ -62,24 +65,27 @@ class DoctorCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return InkWell(
+      onTap: onBookTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: AppColors.cardBorder, width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Top Row: Avatar on the right (RTL start), Doctor details in the middle, Favorite icon on the left (RTL end)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +125,7 @@ class DoctorCardWidget extends StatelessWidget {
                         const Icon(
                           Icons.star_rounded,
                           size: 18,
-                          color: Color(0xFFF59E0B),
+                          color: AppColors.badgeYellow,
                         ),
                         SizedBox(width: 4.w),
                         Text(
@@ -135,7 +141,7 @@ class DoctorCardWidget extends StatelessWidget {
                           '(${doctor.totalReviews} ${context.translate(LocalizationKeys.reviews)})',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: const Color(0xFF94A3B8),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -153,9 +159,9 @@ class DoctorCardWidget extends StatelessWidget {
                   height: 38.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFF8FAFC),
+                    color: AppColors.white,
                     border: Border.all(
-                      color: const Color(0xFFE2E8F0),
+                      color: AppColors.borderLight,
                       width: 1.0,
                     ),
                   ),
@@ -165,8 +171,8 @@ class DoctorCardWidget extends StatelessWidget {
                         : Icons.favorite_border_rounded,
                     size: 20.r,
                     color: isFavorite
-                        ? const Color(0xFFEF4444)
-                        : const Color(0xFF64748B),
+                        ? AppColors.errorRed
+                        : AppColors.textMuted,
                   ),
                 ),
               ),
@@ -179,12 +185,18 @@ class DoctorCardWidget extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
+                border: Border.all(color: AppColors.cardBorder),
               ),
               child: Row(
                 children: [
+                  SvgPicture.asset(
+                    AppAssetPaths.clinicIcon,
+                    width: 38.r,
+                    height: 38.r,
+                  ),
+                  SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,26 +216,12 @@ class DoctorCardWidget extends StatelessWidget {
                           '${doctor.clinicAddress} · ${context.translate(LocalizationKeys.distanceKmAway).replaceAll('{distance}', doctor.formattedDistance)}',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: const Color(0xFF64748B),
+                            color: AppColors.textMuted,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Container(
-                    width: 36.r,
-                    height: 36.r,
-                    decoration: BoxDecoration(
-                      color: AppColors.colorPrimary,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Icon(
-                      Icons.local_hospital_rounded,
-                      color: Colors.white,
-                      size: 20.r,
                     ),
                   ),
                 ],
@@ -235,7 +233,7 @@ class DoctorCardWidget extends StatelessWidget {
                 Icon(
                   Icons.location_on_outlined,
                   size: 16.r,
-                  color: const Color(0xFF64748B),
+                  color: AppColors.textMuted,
                 ),
                 SizedBox(width: 4.w),
                 Expanded(
@@ -243,7 +241,7 @@ class DoctorCardWidget extends StatelessWidget {
                     '${doctor.clinicAddress} · ${context.translate(LocalizationKeys.distanceKmAway).replaceAll('{distance}', doctor.formattedDistance)}',
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: const Color(0xFF64748B),
+                      color: AppColors.textMuted,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -254,48 +252,52 @@ class DoctorCardWidget extends StatelessWidget {
           SizedBox(height: 12.h),
 
           // Badges: Next Available Slot on the right + Accepts Insurance on the left
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 6.h,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (doctor.nextAvailableSlot != null &&
                   doctor.nextAvailableSlot!.isNotEmpty)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 6.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.colorSecondary.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 14.r,
-                        color: AppColors.colorPrimary,
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        doctor.nextAvailableSlot!,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.colorPrimary,
+                Flexible(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.colorSecondary,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 20.r,
+                          color: AppColors.textSecondaryColor,
                         ),
-                      ),
-                    ],
+                        SizedBox(width: 6.w),
+                        Flexible(
+                          child: Text(
+                            doctor.nextAvailableSlot!,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondaryColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+              SizedBox(width: 8.w),
+              if(doctor.acceptsPatientInsurance)
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 6.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: AppColors.lightBlue,
                   borderRadius: BorderRadius.circular(16.r),
                 ),
                 child: Text(
@@ -303,7 +305,6 @@ class DoctorCardWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF2563EB),
                   ),
                 ),
               ),
@@ -323,7 +324,7 @@ class DoctorCardWidget extends StatelessWidget {
                     context.translate(LocalizationKeys.consultationFee),
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: const Color(0xFF94A3B8),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -364,7 +365,7 @@ class DoctorCardWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    context.translate(LocalizationKeys.bookNow),
+                    context.translate(LocalizationKeys.showDetails),
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -377,7 +378,7 @@ class DoctorCardWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
-
+}

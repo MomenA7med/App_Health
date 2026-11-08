@@ -111,6 +111,10 @@ class LocalizationKeys {
   static const chooseWhatSuitsYou = 'choose_what_suits_you';
   static const clearAll = 'clear_all';
   static const searchLocation = 'search_location';
+  static const locationMethod = 'location_method';
+  static const savedAddress = 'saved_address';
+  static const selectArea = 'select_area';
+  static const noInsurance = 'no_insurance';
   static const governorate = 'governorate';
   static const area = 'area';
   static const chooseAddress = 'choose_address';
@@ -133,4 +137,42 @@ class LocalizationKeys {
   static const fromPrice = 'from_price';
   static const toPrice = 'to_price';
   static const defaultLocation = 'default_location';
+  static const showDetails = 'show_details';
+
+  /// Doctor Details
+  static const aboutDoctor = 'about_doctor';
+  static const aboutTheDoctor = 'about_the_doctor';
+  static const qualificationsAndExperience = 'qualifications_and_experience';
+  static const clinicWorkingHours = 'clinic_working_hours';
+  static const callClinic = 'call_clinic';
+  static const message = 'message';
+  static const patientReviews = 'patient_reviews';
+  static const basedOnReviews = 'based_on_reviews';
+  static const proceedToBooking = 'proceed_to_booking';
+  static const noReviewsFound = 'no_reviews_found';
+  static const topRated = 'top_rated';
+  static const fromDaysToDays = 'from_days_to_days';
+
+  /// Addresses
+  static const chooseAddressHelper = 'choose_address_helper';
+  static const savedAddresses = 'saved_addresses';
+  static const useCurrentLocation = 'use_current_location';
+  static const detectLocationAutomatically = 'detect_location_automatically';
+  static const selectAction = 'select_action';
+  static const determineAction = 'determine_action';
+  static const addNewAddress = 'add_new_address';
+  static const noSavedAddresses = 'no_saved_addresses';
+  static const addAddressHelper = 'add_address_helper';
+  static const addressName = 'address_name';
+  static const addressNameHint = 'address_name_hint';
+  static const chooseGovernorate = 'choose_governorate';
+  static const chooseArea = 'choose_area';
+  static const detailedAddress = 'detailed_address';
+  static const detailedAddressHint = 'detailed_address_hint';
+  static const saveAndUseAddress = 'save_and_use_address';
+  static const addressSavedSuccessfully = 'address_saved_successfully';
+  static const pleaseEnterAddressName = 'please_enter_address_name';
+  static const pleaseChooseGovernorate = 'please_choose_governorate';
+  static const pleaseChooseArea = 'please_choose_area';
+  static const pleaseEnterDetailedAddress = 'please_enter_detailed_address';
 }

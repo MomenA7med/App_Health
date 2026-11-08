@@ -102,6 +102,14 @@ class PreferencesManager {
     return await PreferencesUtils.getString(PreferencesKeys.profileImage.name);
   }
 
+  Future<void> setAddress(String data) async {
+    await PreferencesUtils.setString(PreferencesKeys.address.name, data);
+  }
+
+  Future<String?> getAddress() async {
+    return await PreferencesUtils.getString(PreferencesKeys.address.name);
+  }
+
   Future<String?> getPhone() async {
     return await PreferencesUtils.getString(PreferencesKeys.phone.name);
   }

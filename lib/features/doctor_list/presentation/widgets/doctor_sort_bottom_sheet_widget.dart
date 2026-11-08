@@ -75,7 +75,7 @@ class _DoctorSortBottomSheetWidgetState
           border: Border.all(
             color: isSelected
                 ? AppColors.colorPrimary
-                : const Color(0xFFE2E8F0),
+                : AppColors.borderLight,
             width: isSelected ? 1.5 : 1.0,
           ),
         ),
@@ -91,7 +91,7 @@ class _DoctorSortBottomSheetWidgetState
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   color: isSelected
                       ? AppColors.buttonBlackTextColor
-                      : const Color(0xFF334155),
+                      : AppColors.textHeader,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -107,7 +107,7 @@ class _DoctorSortBottomSheetWidgetState
                 border: Border.all(
                   color: isSelected
                       ? AppColors.colorPrimary
-                      : const Color(0xFFCBD5E1),
+                      : AppColors.bottomSheetDragHandle,
                   width: 2.0,
                 ),
               ),
@@ -144,7 +144,7 @@ class _DoctorSortBottomSheetWidgetState
                 width: 44.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5E1),
+                  color: AppColors.bottomSheetDragHandle,
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -174,7 +174,7 @@ class _DoctorSortBottomSheetWidgetState
               title: context.translate(LocalizationKeys.highestRated),
               icon: Icon(
                 Icons.star_rounded,
-                color: const Color(0xFFFBBF24),
+                color: AppColors.starFilled,
                 size: 22.r,
               ),
             ),
@@ -183,7 +183,7 @@ class _DoctorSortBottomSheetWidgetState
               title: context.translate(LocalizationKeys.priceLowToHigh),
               icon: Icon(
                 Icons.credit_card_outlined,
-                color: const Color(0xFF64748B),
+                color: AppColors.textMuted,
                 size: 20.r,
               ),
             ),
@@ -192,7 +192,7 @@ class _DoctorSortBottomSheetWidgetState
               title: context.translate(LocalizationKeys.priceHighToLow),
               icon: Icon(
                 Icons.credit_card_outlined,
-                color: const Color(0xFF64748B),
+                color: AppColors.textMuted,
                 size: 20.r,
               ),
             ),

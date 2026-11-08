@@ -1,4 +1,6 @@
 import 'package:app_health/apis/api_urls.dart';
+import 'package:app_health/app_router.dart';
+import 'package:app_health/features/login/presentation/screen/login_screen.dart';
 import 'package:app_health/flavor_config/app_config_utils.dart';
 import 'package:app_health/local_storage/local_storage_manager.dart';
 import 'package:app_health/utils/extensions/extension_string.dart';
@@ -21,6 +23,7 @@ class UserMangers {
   String? refreshToken;
   String _userId = '';
   String _token = '';
+  String _address = '';
   LocaleApp _localeApp = LocaleApp.en;
 
   bool isGustUser() {
@@ -42,6 +45,14 @@ class UserMangers {
 
   void setProfileImageUrl(String profileImageUrl) {
     _profileImageUrl = profileImageUrl;
+  }
+
+  void setAddress(String address) {
+    _address = address;
+  }
+
+  String getAddress() {
+    return _address;
   }
 
   String get profileImageUrl {
@@ -124,6 +135,7 @@ class UserMangers {
     _gender = await localStorageManager.getGender() ?? '';
     _profileImageUrl = await localStorageManager.getProfileImage() ?? '';
     _userId = await localStorageManager.getUserId() ?? '';
+    _address = await localStorageManager.getAddress() ?? '';
   }
 
   Future<void> signOut() async {
@@ -140,7 +152,7 @@ class UserMangers {
 
     localStorageManager.clearData();
     localStorageManager.setLogout();
-    //TODO
-    // AppRouter.mainNavigatorKey.currentContext?.go(LoginScreen.routeName);
+
+    LoginScreen.open(context: AppRouter.mainNavigatorKey.currentContext!);
   }
 }
