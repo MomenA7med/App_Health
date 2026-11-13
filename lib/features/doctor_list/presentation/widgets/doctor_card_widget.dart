@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/features/doctor_list/data/models/specialty_doctors_response_model.dart';
+import 'package:app_health/features/widgets/app_badge_widget.dart';
+import 'package:app_health/features/widgets/app_favorite_button.dart';
+import 'package:app_health/features/widgets/app_rating_widget.dart';
+import 'package:app_health/features/widgets/location_distance_widget.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/locale/app_localization_keys.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -120,61 +124,19 @@ class DoctorCardWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 6.h),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star_rounded,
-                          size: 18,
-                          color: AppColors.badgeYellow,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          doctor.ratingAverage.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.buttonBlackTextColor,
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '(${doctor.totalReviews} ${context.translate(LocalizationKeys.reviews)})',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                    AppRatingWidget(
+                      ratingAverage: doctor.ratingAverage,
+                      totalReviews: doctor.totalReviews,
+                      starSize: 18,
                     ),
                   ],
                 ),
               ),
               SizedBox(width: 12.w),
               // Favorite Button on the end/left
-              InkWell(
+              AppFavoriteButton(
+                isFavorite: isFavorite,
                 onTap: onFavoriteTap,
-                borderRadius: BorderRadius.circular(20.r),
-                child: Container(
-                  width: 38.r,
-                  height: 38.r,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.white,
-                    border: Border.all(
-                      color: AppColors.borderLight,
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Icon(
-                    isFavorite
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    size: 20.r,
-                    color: isFavorite
-                        ? AppColors.errorRed
-                        : AppColors.textMuted,
-                  ),
-                ),
               ),
             ],
           ),
@@ -228,26 +190,9 @@ class DoctorCardWidget extends StatelessWidget {
               ),
             )
           else if (doctor.clinicAddress.isNotEmpty)
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  size: 16.r,
-                  color: AppColors.textMuted,
-                ),
-                SizedBox(width: 4.w),
-                Expanded(
-                  child: Text(
-                    '${doctor.clinicAddress} · ${context.translate(LocalizationKeys.distanceKmAway).replaceAll('{distance}', doctor.formattedDistance)}',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textMuted,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+            LocationDistanceWidget(
+              address: doctor.clinicAddress,
+              formattedDistance: doctor.formattedDistance,
             ),
           SizedBox(height: 12.h),
 
@@ -293,21 +238,8 @@ class DoctorCardWidget extends StatelessWidget {
                   ),
                 ),
               SizedBox(width: 8.w),
-              if(doctor.acceptsPatientInsurance)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Text(
-                  context.translate(LocalizationKeys.acceptsInsurance),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              if (doctor.acceptsPatientInsurance)
+                AppBadgeWidget.insurance(context: context),
             ],
           ),
           SizedBox(height: 14.h),

@@ -17,8 +17,8 @@ class CreateAddressSendModel extends Equatable {
 
   Map<String, dynamic> toJson() => {
         'addressName': addressName,
-        'governorateId': governorate,
-        'areaId': area,
+        'governorate': governorate,
+        'area': area,
         'detailedAddress': detailedAddress,
         'isCurrentLocation': isCurrentLocation,
       };

@@ -83,6 +83,8 @@ class LocalizationKeys {
 
   /// Medical Specialties
   static const medicalSpecialties = 'medical_specialties';
+  static const specialty = 'specialty';
+  static const allSpecialties = 'all_specialties';
   static const chooseSpecialtyTitle = 'choose_specialty_title';
   static const chooseSpecialtySubtitle = 'choose_specialty_subtitle';
   static const searchSpecialtyHint = 'search_specialty_hint';
@@ -175,4 +177,12 @@ class LocalizationKeys {
   static const pleaseChooseGovernorate = 'please_choose_governorate';
   static const pleaseChooseArea = 'please_choose_area';
   static const pleaseEnterDetailedAddress = 'please_enter_detailed_address';
+
+  /// Hospitals
+  static const hospitals = 'hospitals';
+  static const searchHospitals = 'search_hospitals';
+  static const noHospitalsFound = 'no_hospitals_found';
+  static const sortHospitals = 'sort_hospitals';
+  static const open24Hours = 'open_24_hours';
+  static const specialties = 'specialties';
 }

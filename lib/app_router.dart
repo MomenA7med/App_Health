@@ -1,6 +1,7 @@
 import 'package:app_health/features/addresses/presentation/screens/add_address_screen.dart';
 import 'package:app_health/features/doctor_details/presentation/screens/doctor_details_screen.dart';
 import 'package:app_health/features/doctor_list/presentation/screens/doctor_list_screen.dart';
+import 'package:app_health/features/hospital_list/presentation/screens/hospital_list_screen.dart';
 import 'package:app_health/features/login/presentation/screen/login_screen.dart';
 import 'package:app_health/features/medical_specialties/presentation/screen/medical_specialties_screen.dart';
 import 'package:app_health/features/register/presentation/screen/register_screen.dart';
@@ -62,6 +63,10 @@ class AppRouter {
       GoRoute(
         path: AddAddressScreen.routeName,
         builder: (context, state) => const AddAddressScreenWithBloc(),
+      ),
+      GoRoute(
+        path: HospitalListScreen.routeName,
+        builder: (context, state) => const HospitalListScreen(),
       ),
     ],
   );

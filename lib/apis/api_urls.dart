@@ -18,6 +18,9 @@ class ApiUrls {
   static const insuranceCompanies = "/api/insurance-companies";
   static const governorates = "/api/governorates";
 
+  /// Hospitals
+  static const hospitalsFilter = "/api/hospitals/filter";
+
   /// Addresses
   static const userAddresses = "/api/patients/me/addresses";
 

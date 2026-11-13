@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:app_health/features/doctor_details/data/models/doctor_profile_response_model.dart';
+import 'package:app_health/features/widgets/app_badge_widget.dart';
 import 'package:app_health/res/app_asset_paths.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/extensions/extension_localization.dart';
@@ -41,38 +42,17 @@ class DoctorDetailsClinicCardWidget extends StatelessWidget {
         Row(
           children: [
             if (doctor.ratingAverage >= 4.5) ...[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: AppColors.badgeGreenBg,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Text(
-                  context.translate(LocalizationKeys.topRated),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.badgeGreenText,
-                  ),
-                ),
+              AppBadgeWidget(
+                text: context.translate(LocalizationKeys.topRated),
+                backgroundColor: AppColors.badgeGreenBg,
+                textColor: AppColors.badgeGreenText,
               ),
               SizedBox(width: 8.w),
             ],
             if (doctor.acceptsPatientInsurance) ...[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Text(
-                  context.translate(LocalizationKeys.acceptsInsurance),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.colorPrimary,
-                  ),
-                ),
+              AppBadgeWidget.insurance(
+                context: context,
+                textColor: AppColors.colorPrimary,
               ),
             ],
           ],

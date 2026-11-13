@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:app_health/features/hospital_list/presentation/screens/hospital_list_screen.dart';
 import 'package:app_health/features/login/presentation/screen/login_screen.dart';
-import 'package:app_health/features/medical_specialties/presentation/screen/medical_specialties_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:app_health/features/widgets/logo_widget.dart';
@@ -83,6 +83,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _openHomeScreen() async {
-    MedicalSpecialtiesScreen.open(context: context);
+    HospitalListScreen.open(context: context);
   }
 }

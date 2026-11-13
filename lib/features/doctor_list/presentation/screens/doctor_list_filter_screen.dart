@@ -1,4 +1,3 @@
-import 'package:app_health/features/addresses/presentation/widgets/choose_address_bottom_sheet.dart';
 import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,7 +11,7 @@ import 'package:app_health/features/doctor_list/data/models/insurance_company_mo
 import 'package:app_health/features/doctor_list/data/repository/doctor_list_repository.dart';
 import 'package:app_health/features/doctor_list/domain/repositories/base_doctor_list_repository.dart';
 import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
-import 'package:app_health/logic/user_manager.dart';
+import 'package:app_health/features/widgets/location_filter_selector_widget.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/app_image/app_cached_network_image.dart';
 import 'package:app_health/utils/locale/app_localization_keys.dart';
@@ -180,21 +179,6 @@ class _DoctorListFilterScreenState
     });
   }
 
-  GovernorateModel? get _currentGovernorate {
-    if (_governorates.isEmpty ||
-        (_selectedGovernorateId == null && _selectedGovernorate == null)) {
-      return null;
-    }
-    final matches = _governorates.where(
-      (g) => g.id == _selectedGovernorateId || g.name == _selectedGovernorate,
-    );
-    return matches.isNotEmpty ? matches.first : null;
-  }
-
-  List<AreaModel> get _currentAreas {
-    return _currentGovernorate?.areas ?? [];
-  }
-
   String? _resolveGovId(String? raw) {
     if (raw == null || raw.isEmpty) return null;
     final matches = _governorates.where((g) => g.id == raw || g.name == raw);
@@ -229,243 +213,6 @@ class _DoctorListFilterScreenState
     return raw;
   }
 
-  Widget _buildProfileTabs() {
-    final bool isAreaSelected = _locationMode == 'area';
-    return Container(
-      height: 48.h,
-      padding: EdgeInsets.all(4.r),
-      decoration: BoxDecoration(
-        color: AppColors.tabBackground,
-        borderRadius: BorderRadius.circular(24.r),
-      ),
-      child: Row(
-        children: [
-          // Tab 1: تحديد المنطقة
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _locationMode = 'area';
-                });
-              },
-              borderRadius: BorderRadius.circular(20.r),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isAreaSelected ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.r),
-                  boxShadow: isAreaSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  context.translate(LocalizationKeys.selectArea),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: isAreaSelected
-                        ? FontWeight.bold
-                        : FontWeight.w500,
-                    color: isAreaSelected
-                        ? AppColors.colorPrimary
-                        : AppColors.textBody,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Tab 2: عنوان محفوظ
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _locationMode = 'saved';
-                });
-              },
-              borderRadius: BorderRadius.circular(20.r),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: !isAreaSelected ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.r),
-                  boxShadow: !isAreaSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  context.translate(LocalizationKeys.savedAddress),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: !isAreaSelected
-                        ? FontWeight.bold
-                        : FontWeight.w500,
-                    color: !isAreaSelected
-                        ? AppColors.colorPrimary
-                        : AppColors.textBody,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropdownField<T>({
-    required String label,
-    required String valueText,
-    String? hintText,
-    required List<DropdownMenuItem<T>> items,
-    required T? currentValue,
-    required ValueChanged<T?> onChanged,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.borderSubtle),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: AppColors.textBody,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 2.h),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              isExpanded: true,
-              value: currentValue,
-              hint: hintText != null
-                  ? Text(
-                      hintText,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: AppColors.textBody,
-                      ),
-                    )
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textBody,
-              ),
-              items: items,
-              onChanged: onChanged,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSavedAddressCard() {
-    String savedAddress = '';
-    if (GetIt.I.isRegistered<UserMangers>()) {
-      savedAddress = GetIt.I<UserMangers>().getAddress();
-    }
-    if (savedAddress.trim().isEmpty) {
-      savedAddress = context.translate(
-        LocalizationKeys.fromAddressesOrCurrentLocation,
-      );
-    }
-
-    return InkWell(
-      onTap: () async {
-        final address = await ChooseAddressBottomSheet.show(
-          context: context,
-          onSelectAddress: (selected) {
-            setState(() {
-              _selectedGovernorateId = selected.governorate;
-              _selectedAreaId = selected.area;
-            });
-          },
-        );
-        if (address != null && mounted) {
-          setState(() {
-            _selectedGovernorateId = address.governorate;
-            _selectedAreaId = address.area;
-          });
-        }
-      },
-      borderRadius: BorderRadius.circular(16.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.borderSubtle),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38.r,
-              height: 38.r,
-              decoration: BoxDecoration(
-                color: AppColors.colorSecondary.withValues(alpha: 0.6),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.location_on_outlined,
-                color: AppColors.colorPrimary,
-                size: 20.r,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.translate(LocalizationKeys.chooseAddress),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    savedAddress,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textBody,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.check_circle_rounded,
-              color: AppColors.colorPrimary,
-              size: 22.r,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildGenderChip({required int doctorType, required String title}) {
     final bool isSelected = _selectedGender == doctorType;
     return Expanded(
@@ -494,9 +241,7 @@ class _DoctorListFilterScreenState
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected
-                  ? AppColors.colorPrimary
-                  : AppColors.textBody,
+              color: isSelected ? AppColors.colorPrimary : AppColors.textBody,
             ),
           ),
         ),
@@ -532,9 +277,7 @@ class _DoctorListFilterScreenState
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected
-                  ? AppColors.colorPrimary
-                  : AppColors.textBody,
+              color: isSelected ? AppColors.colorPrimary : AppColors.textBody,
             ),
           ),
         ),
@@ -694,112 +437,39 @@ class _DoctorListFilterScreenState
                     ),
                     SizedBox(height: 16.h),
 
-                    // Location Filters Section: "طريقة تحديد الموقع"
-                    Text(
-                      context.translate(LocalizationKeys.locationMethod),
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
+                    LocationFilterSelectorWidget(
+                      locationMode: _locationMode,
+                      onLocationModeChanged: (mode) {
+                        setState(() {
+                          _locationMode = mode;
+                        });
+                      },
+                      governorates: _governorates,
+                      selectedGovernorateId: _selectedGovernorateId,
+                      selectedGovernorateName: _selectedGovernorate,
+                      selectedAreaId: _selectedAreaId,
+                      selectedAreaName: _selectedArea,
+                      onGovernorateChanged: (id, name) {
+                        setState(() {
+                          _selectedGovernorateId = id;
+                          _selectedGovernorate = name;
+                          _selectedAreaId = null;
+                          _selectedArea = null;
+                        });
+                      },
+                      onAreaChanged: (id, name) {
+                        setState(() {
+                          _selectedAreaId = id;
+                          _selectedArea = name;
+                        });
+                      },
+                      onSavedAddressSelected: (govId, areaId) {
+                        setState(() {
+                          _selectedGovernorateId = govId;
+                          _selectedAreaId = areaId;
+                        });
+                      },
                     ),
-                    SizedBox(height: 12.h),
-
-                    // Profile Tabs
-                    _buildProfileTabs(),
-                    SizedBox(height: 12.h),
-
-                    // Conditional Content based on Location Mode
-                    if (_locationMode == 'area')
-                      Row(
-                        children: [
-                          // Governorate Dropdown (المحافظة)
-                          Expanded(
-                            child: _buildDropdownField<String>(
-                              label: context.translate(
-                                LocalizationKeys.governorate,
-                              ),
-                              hintText: context.translate(
-                                LocalizationKeys.governorate,
-                              ),
-                              valueText: _selectedGovernorate ?? '',
-                              currentValue:
-                                  _governorates.any(
-                                    (g) => g.id == _selectedGovernorateId,
-                                  )
-                                  ? _selectedGovernorateId
-                                  : null,
-                              items: _governorates.map((gov) {
-                                return DropdownMenuItem<String>(
-                                  value: gov.id,
-                                  child: Text(
-                                    gov.name,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textDark,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (newGovId) {
-                                if (newGovId == null) return;
-                                final gov = _governorates.firstWhere(
-                                  (g) => g.id == newGovId,
-                                );
-                                setState(() {
-                                  _selectedGovernorateId = gov.id;
-                                  _selectedGovernorate = gov.name;
-                                  _selectedAreaId = null;
-                                  _selectedArea = null;
-                                });
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          // Area Dropdown (المنطقة)
-                          Expanded(
-                            child: _buildDropdownField<String>(
-                              label: context.translate(LocalizationKeys.area),
-                              hintText: context.translate(
-                                LocalizationKeys.area,
-                              ),
-                              valueText: _selectedArea ?? '',
-                              currentValue:
-                                  _currentAreas.any(
-                                    (a) => a.id == _selectedAreaId,
-                                  )
-                                  ? _selectedAreaId
-                                  : null,
-                              items: _currentAreas.map((area) {
-                                return DropdownMenuItem<String>(
-                                  value: area.id,
-                                  child: Text(
-                                    area.name,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textDark,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (newAreaId) {
-                                if (newAreaId == null) return;
-                                final area = _currentAreas.firstWhere(
-                                  (a) => a.id == newAreaId,
-                                );
-                                setState(() {
-                                  _selectedAreaId = area.id;
-                                  _selectedArea = area.name;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      _buildSavedAddressCard(),
 
                     SizedBox(height: 20.h),
                     const Divider(color: AppColors.borderSubtle, thickness: 1),
@@ -855,9 +525,7 @@ class _DoctorListFilterScreenState
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(14.r),
-                              border: Border.all(
-                                color: AppColors.borderSubtle,
-                              ),
+                              border: Border.all(color: AppColors.borderSubtle),
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -882,9 +550,7 @@ class _DoctorListFilterScreenState
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(14.r),
-                              border: Border.all(
-                                color: AppColors.borderSubtle,
-                              ),
+                              border: Border.all(color: AppColors.borderSubtle),
                             ),
                             alignment: Alignment.center,
                             child: Text(

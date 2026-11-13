@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:app_health/features/doctor_details/data/models/doctor_profile_response_model.dart';
+import 'package:app_health/features/widgets/app_favorite_button.dart';
 import 'package:app_health/res/app_colors.dart';
 
 class DoctorDetailsHeaderWidget extends StatelessWidget {
@@ -171,34 +172,19 @@ class DoctorDetailsHeaderWidget extends StatelessWidget {
                   ),
                 ),
                 // Favorite Button
-                InkWell(
+                AppFavoriteButton(
+                  isFavorite: isFavorite,
                   onTap: onFavoriteTap,
-                  borderRadius: BorderRadius.circular(20.r),
-                  child: Container(
-                    width: 40.r,
-                    height: 40.r,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      border: Border.all(color: AppColors.borderLight),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                  size: 40,
+                  activeColor: AppColors.colorPrimary,
+                  inactiveColor: AppColors.buttonBlackTextColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
-                    child: Icon(
-                      isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      size: 20.r,
-                      color: isFavorite
-                          ? AppColors.colorPrimary
-                          : AppColors.buttonBlackTextColor,
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),

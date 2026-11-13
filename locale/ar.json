@@ -71,6 +71,8 @@
   "register_success": "تم إنشاء الحساب بنجاح",
   "already_have_account": "لديك حساب بالفعل؟",
   "medical_specialties": "التخصصات",
+  "specialty": "التخصص",
+  "all_specialties": "كل التخصصات",
   "choose_specialty_title": "اختار التخصص المناسب",
   "choose_specialty_subtitle": "ابدأ بتخصصك، وشوف الدكاترة الأقرب ليك.",
   "search_specialty_hint": "ابحث عن تخصص",
@@ -154,5 +156,11 @@
   "please_enter_address_name": "يرجى إدخال اسم العنوان",
   "please_choose_governorate": "يرجى اختيار المحافظة",
   "please_choose_area": "يرجى اختيار المنطقة",
-  "please_enter_detailed_address": "يرجى إدخال العنوان بالتفصيل"
+  "please_enter_detailed_address": "يرجى إدخال العنوان بالتفصيل",
+  "hospitals": "المستشفيات",
+  "search_hospitals": "ابحث عن مستشفى...",
+  "no_hospitals_found": "لم يتم العثور على مستشفيات",
+  "sort_hospitals": "ترتيب المستشفيات",
+  "open_24_hours": "مفتوحة 24 ساعة",
+  "specialties": "التخصصات"
 }

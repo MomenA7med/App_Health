@@ -71,6 +71,8 @@
   "register_success": "Registration completed successfully",
   "already_have_account": "Already have an account?",
   "medical_specialties": "Specialties",
+  "specialty": "Specialty",
+  "all_specialties": "All Specialties",
   "choose_specialty_title": "Select Appropriate Specialty",
   "choose_specialty_subtitle": "Start with your specialty, and find doctors near you.",
   "search_specialty_hint": "Search for a specialty",
@@ -154,6 +156,12 @@
   "please_enter_address_name": "Please enter address name",
   "please_choose_governorate": "Please choose governorate",
   "please_choose_area": "Please choose area",
-  "please_enter_detailed_address": "Please enter detailed address"
+  "please_enter_detailed_address": "Please enter detailed address",
+  "hospitals": "Hospitals",
+  "search_hospitals": "Search for a hospital...",
+  "no_hospitals_found": "No hospitals found",
+  "sort_hospitals": "Sort Hospitals",
+  "open_24_hours": "Open 24 hours",
+  "specialties": "Specialties"
 }
 
