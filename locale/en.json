@@ -162,6 +162,21 @@
   "no_hospitals_found": "No hospitals found",
   "sort_hospitals": "Sort Hospitals",
   "open_24_hours": "Open 24 hours",
-  "specialties": "Specialties"
+  "specialties": "Specialties",
+  "hospital_details": "Hospital Details",
+  "call": "Call",
+  "about_hospital": "About Hospital",
+  "about_the_hospital": "About The Hospital",
+  "insurance": "Insurance",
+  "available_specialties": "Available Specialties",
+  "accepted_insurance_companies": "Accepted Insurance Companies",
+  "working_hours": "Working Hours",
+  "reception_and_emergency": "Reception & Emergency:",
+  "clinics_hours_vary_by_specialty": "Clinic hours vary by specialty.",
+  "services_and_facilities": "Services & Facilities",
+  "no_accepted_insurance": "No insurance companies listed currently",
+  "no_specialties_in_hospital": "No specialties available currently",
+  "available_24_hours": "Available 24/7",
+  "hospital_profile_error": "An error occurred while loading hospital details"
 }
 

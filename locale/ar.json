@@ -162,5 +162,20 @@
   "no_hospitals_found": "لم يتم العثور على مستشفيات",
   "sort_hospitals": "ترتيب المستشفيات",
   "open_24_hours": "مفتوحة 24 ساعة",
-  "specialties": "التخصصات"
+  "specialties": "التخصصات",
+  "hospital_details": "تفاصيل المستشفى",
+  "call": "اتصال",
+  "about_hospital": "عن المستشفى",
+  "about_the_hospital": "نبذة عن المستشفى",
+  "insurance": "التأمين",
+  "available_specialties": "التخصصات المتاحة",
+  "accepted_insurance_companies": "شركات التأمين المقبولة",
+  "working_hours": "مواعيد العمل",
+  "reception_and_emergency": "الاستقبال والطوارئ:",
+  "clinics_hours_vary_by_specialty": "تختلف مواعيد العيادات حسب التخصص.",
+  "services_and_facilities": "الخدمات والمرافق",
+  "no_accepted_insurance": "لا توجد شركات تأمين مضافة حالياً",
+  "no_specialties_in_hospital": "لا توجد تخصصات متاحة حالياً",
+  "available_24_hours": "متاح 24 ساعة",
+  "hospital_profile_error": "حدث خطأ أثناء تحميل بيانات المستشفى"
 }

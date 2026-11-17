@@ -12,6 +12,7 @@ import 'package:app_health/features/addresses/presentation/widgets/choose_addres
 import 'package:app_health/features/core/data/models/meta/paging_send_model.dart';
 import 'package:app_health/features/core/domain/entities/meta/meta_ui_model.dart';
 import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
+import 'package:app_health/features/hospital_details/presentation/screens/hospital_details_screen.dart';
 import 'package:app_health/features/hospital_list/data/datasources/hospital_list_api_manager.dart';
 import 'package:app_health/features/hospital_list/data/models/hospital_filter_model.dart';
 import 'package:app_health/features/hospital_list/data/models/hospital_list_send_model.dart';
@@ -473,7 +474,7 @@ class _HospitalListScreenWithBlocState
             currentBloc.add(ToggleFavoriteHospitalEvent(hospital.id));
           },
           onTap: () {
-            // Can navigate to hospital details when implemented
+            HospitalDetailsScreen.open(context, hospitalId: hospital.id);
           },
         );
       },

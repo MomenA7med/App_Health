@@ -279,7 +279,7 @@ void main() {
       expect(map['page'], 2);
       expect(map['pageSize'], 15);
       expect(map['search'], 'شفاء');
-      expect(map['sortBy'], 'nearest');
+      expect(map['sortBy'], 1);
       expect(map['governorateId'], 'gov_1');
       expect(map['areaId'], 'area_2');
       expect(map['insuranceCompanyId'], 'ins_3');

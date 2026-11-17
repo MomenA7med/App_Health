@@ -20,6 +20,8 @@ class ApiUrls {
 
   /// Hospitals
   static const hospitalsFilter = "/api/hospitals/filter";
+  static String hospitalProfile(String hospitalId) =>
+      "/api/hospitals/$hospitalId";
 
   /// Addresses
   static const userAddresses = "/api/patients/me/addresses";

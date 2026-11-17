@@ -184,5 +184,20 @@ class LocalizationKeys {
   static const noHospitalsFound = 'no_hospitals_found';
   static const sortHospitals = 'sort_hospitals';
   static const open24Hours = 'open_24_hours';
+  static const hospitalDetails = 'hospital_details';
+  static const call = 'call';
+  static const aboutHospital = 'about_hospital';
+  static const aboutTheHospital = 'about_the_hospital';
+  static const insurance = 'insurance';
+  static const availableSpecialties = 'available_specialties';
+  static const acceptedInsuranceCompanies = 'accepted_insurance_companies';
+  static const workingHours = 'working_hours';
+  static const receptionAndEmergency = 'reception_and_emergency';
+  static const clinicsHoursVaryBySpecialty = 'clinics_hours_vary_by_specialty';
+  static const servicesAndFacilities = 'services_and_facilities';
+  static const noAcceptedInsurance = 'no_accepted_insurance';
+  static const noSpecialtiesInHospital = 'no_specialties_in_hospital';
+  static const available24Hours = 'available_24_hours';
+  static const hospitalProfileError = 'hospital_profile_error';
   static const specialties = 'specialties';
 }
