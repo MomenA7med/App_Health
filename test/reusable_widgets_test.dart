@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:app_health/features/doctor_list/data/models/governorate_model.dart';
 import 'package:app_health/features/medical_specialties/data/models/medical_specialties_response_model.dart';
 import 'package:app_health/features/widgets/app_badge_widget.dart';
+import 'package:app_health/features/widgets/app_contact_actions_widget.dart';
+import 'package:app_health/features/widgets/app_error_widget.dart';
 import 'package:app_health/features/widgets/app_favorite_button.dart';
 import 'package:app_health/features/widgets/app_filter_dropdown_widget.dart';
 import 'package:app_health/features/widgets/app_rating_widget.dart';
 import 'package:app_health/features/widgets/app_search_bar_widget.dart';
+import 'package:app_health/features/widgets/filter_and_sort_row_widget.dart';
 import 'package:app_health/features/widgets/location_distance_widget.dart';
 import 'package:app_health/features/widgets/location_filter_selector_widget.dart';
 import 'package:app_health/features/widgets/medical_specialty_filter_dropdown_widget.dart';
@@ -48,6 +51,11 @@ class _FakeLocalizations extends AppLocalizations {
         'العناوين المحفوظة أو الموقع الحالي',
     LocalizationKeys.specialty: 'التخصص',
     LocalizationKeys.allSpecialties: 'كل التخصصات',
+    LocalizationKeys.filter: 'تصفية',
+    LocalizationKeys.retry: 'إعادة المحاولة',
+    LocalizationKeys.call: 'اتصال',
+    LocalizationKeys.callClinic: 'اتصال بالعيادة',
+    LocalizationKeys.message: 'مراسلة',
   };
 
   @override
@@ -261,7 +269,6 @@ void main() {
     testWidgets('MedicalSpecialtyFilterDropdownWidget renders specialties correctly',
         (tester) async {
       String? selectedId;
-      String? selectedName;
 
       final specialties = [
         MedicalSpecialtyModel(
@@ -284,7 +291,6 @@ void main() {
               onSpecialtyChanged: (id, name) {
                 setState(() {
                   selectedId = id;
-                  selectedName = name;
                 });
               },
             );
@@ -295,6 +301,120 @@ void main() {
 
       expect(find.text('التخصص'), findsOneWidget);
       expect(find.text('كل التخصصات'), findsWidgets);
+    });
+
+    testWidgets('FilterAndSortRowWidget renders correctly and triggers callbacks',
+        (tester) async {
+      bool filterTapped = false;
+      bool sortTapped = false;
+
+      await tester.pumpWidget(buildTestable(
+        FilterAndSortRowWidget(
+          onFilterTap: () => filterTapped = true,
+          onSortTap: () => sortTapped = true,
+          sortLabel: 'الأعلى تقييماً',
+          hasActiveFilter: false,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('تصفية'), findsOneWidget);
+      expect(find.text('الأعلى تقييماً'), findsOneWidget);
+
+      await tester.tap(find.text('تصفية'));
+      expect(filterTapped, isTrue);
+
+      await tester.tap(find.text('الأعلى تقييماً'));
+      expect(sortTapped, isTrue);
+    });
+
+    testWidgets('FilterAndSortRowWidget displays active filter badge when hasActiveFilter is true',
+        (tester) async {
+      await tester.pumpWidget(buildTestable(
+        FilterAndSortRowWidget(
+          onFilterTap: () {},
+          onSortTap: () {},
+          sortLabel: 'الأقرب',
+          hasActiveFilter: true,
+          activeFiltersCount: 3,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('تصفية'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('الأقرب'), findsOneWidget);
+    });
+
+    testWidgets('AppErrorWidget renders error message and retry button',
+        (tester) async {
+      bool retryTapped = false;
+
+      await tester.pumpWidget(buildTestable(
+        AppErrorWidget(
+          errorMessage: 'حدث خطأ في تحميل البيانات',
+          onRetry: () => retryTapped = true,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.text('حدث خطأ في تحميل البيانات'), findsOneWidget);
+      expect(find.text('إعادة المحاولة'), findsOneWidget);
+
+      await tester.tap(find.text('إعادة المحاولة'));
+      expect(retryTapped, isTrue);
+    });
+
+    testWidgets('AppErrorWidget translates localization key and hides retry when onRetry is null',
+        (tester) async {
+      await tester.pumpWidget(buildTestable(
+        const AppErrorWidget(
+          errorMessage: LocalizationKeys.reviews,
+          isLocalizationKey: true,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.text('تقييم'), findsOneWidget);
+      expect(find.text('إعادة المحاولة'), findsNothing);
+    });
+
+    testWidgets('AppContactActionsWidget renders call and message buttons and triggers callbacks',
+        (tester) async {
+      bool callTapped = false;
+      bool messageTapped = false;
+
+      await tester.pumpWidget(buildTestable(
+        AppContactActionsWidget(
+          onCall: () => callTapped = true,
+          onMessage: () => messageTapped = true,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('اتصال'), findsOneWidget);
+      expect(find.text('مراسلة'), findsOneWidget);
+
+      await tester.tap(find.text('اتصال'));
+      expect(callTapped, isTrue);
+
+      await tester.tap(find.text('مراسلة'));
+      expect(messageTapped, isTrue);
+    });
+
+    testWidgets('AppContactActionsWidget.clinic renders clinic call title',
+        (tester) async {
+      await tester.pumpWidget(buildTestable(
+        const AppContactActionsWidget.clinic(
+          phoneNumber: '01012345678',
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('اتصال بالعيادة'), findsOneWidget);
+      expect(find.text('مراسلة'), findsOneWidget);
     });
   });
 }

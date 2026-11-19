@@ -258,5 +258,22 @@ void main() {
       await tester.tap(find.text('متابعة الحجز'));
       expect(proceedTapped, isTrue);
     });
+
+    testWidgets('DoctorBookingBottomBarWidget renders fee without proceed button when onProceedTap is null',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithMaterial(
+          const DoctorBookingBottomBarWidget(
+            consultationFee: 350,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('سعر الكشف'), findsOneWidget);
+      expect(find.text('350'), findsOneWidget);
+      expect(find.text('ج.م'), findsOneWidget);
+      expect(find.text('متابعة الحجز'), findsNothing);
+    });
   });
 }

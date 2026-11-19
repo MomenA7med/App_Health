@@ -6,6 +6,7 @@ import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/features/hospital_details/data/models/hospital_profile_response_model.dart';
 import 'package:app_health/features/widgets/app_badge_widget.dart';
 import 'package:app_health/features/widgets/app_capsule_tabs_widget.dart';
+import 'package:app_health/features/widgets/app_contact_actions_widget.dart';
 import 'package:app_health/features/widgets/app_rating_widget.dart';
 import 'package:app_health/res/app_asset_paths.dart';
 import 'package:app_health/res/app_colors.dart';
@@ -161,7 +162,7 @@ class HospitalDetailsHeaderWidget extends StatelessWidget {
                         ],
                       ),
                       child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
+                        Icons.arrow_back_ios_rounded,
                         size: 18.r,
                         color: AppColors.buttonBlackTextColor,
                       ),
@@ -313,7 +314,7 @@ class HospitalDetailsHeaderWidget extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    Icons.arrow_back_ios_new_rounded,
+                    Icons.arrow_forward_ios_rounded,
                     size: 14.r,
                     color: AppColors.textSecondary,
                   ),
@@ -322,85 +323,10 @@ class HospitalDetailsHeaderWidget extends StatelessWidget {
               SizedBox(height: 16.h),
 
               // Action Buttons Row (اتصال / مراسلة)
-              Row(
-                children: [
-                  // Call button
-                  Expanded(
-                    child: InkWell(
-                      onTap: onCallTap,
-                      borderRadius: BorderRadius.circular(24.r),
-                      child: Container(
-                        height: 44.h,
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(24.r),
-                          border: Border.all(
-                            color: AppColors.borderLight,
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.phone_outlined,
-                              size: 18.r,
-                              color: AppColors.colorPrimary,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              context.translate(LocalizationKeys.call),
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.colorPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-
-                  // Message button
-                  Expanded(
-                    child: InkWell(
-                      onTap: onMessageTap,
-                      borderRadius: BorderRadius.circular(24.r),
-                      child: Container(
-                        height: 44.h,
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(24.r),
-                          border: Border.all(
-                            color: AppColors.borderLight,
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 18.r,
-                              color: AppColors.colorPrimary,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              context.translate(LocalizationKeys.message),
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.colorPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              AppContactActionsWidget(
+                phoneNumber: hospital.phone,
+                onCall: onCallTap,
+                onMessage: onMessageTap,
               ),
               SizedBox(height: 20.h),
 

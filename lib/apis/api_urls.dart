@@ -23,6 +23,12 @@ class ApiUrls {
   static String hospitalProfile(String hospitalId) =>
       "/api/hospitals/$hospitalId";
 
+  /// Pharmacies
+  static const pharmaciesFilter = "/api/pharmacies/filter";
+  static String pharmacyProfile(String pharmacyId) =>
+      "/api/pharmacies/$pharmacyId";
+  static const sendPrescription = "/api/pharmacies/send-prescription";
+
   /// Addresses
   static const userAddresses = "/api/patients/me/addresses";
 

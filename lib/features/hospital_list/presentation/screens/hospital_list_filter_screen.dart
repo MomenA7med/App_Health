@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:app_health/apis/_base/dio_api_manager.dart';
 import 'package:app_health/apis/errors/error_api_model.dart';
-import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/core/usecase.dart';
 import 'package:app_health/core/widgets/base_stateful_screen_widget.dart';
 import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
@@ -134,7 +133,9 @@ class _HospitalListFilterScreenState
           ),
         ),
         _getMedicalSpecialtiesUseCase(NoParams()).catchError(
-          (err) => Left(ErrorApiModel.identifyError(error: err)),
+          (err) => Left<ErrorApiModel, MedicalSpecialtiesResponseModel>(
+            ErrorApiModel.identifyError(error: err),
+          ),
         ),
       ]);
 

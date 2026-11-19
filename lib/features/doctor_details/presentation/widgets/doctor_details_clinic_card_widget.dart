@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:app_health/features/doctor_details/data/models/doctor_profile_response_model.dart';
 import 'package:app_health/features/widgets/app_badge_widget.dart';
+import 'package:app_health/features/widgets/app_contact_actions_widget.dart';
 import 'package:app_health/res/app_asset_paths.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/extensions/extension_localization.dart';
@@ -12,26 +12,7 @@ import 'package:app_health/utils/locale/app_localization_keys.dart';
 class DoctorDetailsClinicCardWidget extends StatelessWidget {
   final DoctorProfileModel doctor;
 
-  const DoctorDetailsClinicCardWidget({
-    super.key,
-    required this.doctor,
-  });
-
-  Future<void> _makeCall(String? phoneNumber) async {
-    if (phoneNumber == null || phoneNumber.isEmpty) return;
-    final Uri callUri = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunchUrl(callUri)) {
-      await launchUrl(callUri);
-    }
-  }
-
-  Future<void> _sendMessage(String? phoneNumber) async {
-    if (phoneNumber == null || phoneNumber.isEmpty) return;
-    final Uri smsUri = Uri(scheme: 'sms', path: phoneNumber);
-    if (await canLaunchUrl(smsUri)) {
-      await launchUrl(smsUri);
-    }
-  }
+  const DoctorDetailsClinicCardWidget({super.key, required this.doctor});
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +93,8 @@ class DoctorDetailsClinicCardWidget extends StatelessWidget {
 
               // Chevron Arrow
               Icon(
-                Directionality.of(context) == TextDirection.ltr
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-                size: 22.r,
+                Icons.arrow_forward_ios_rounded,
+                size: 16.r,
                 color: AppColors.textSecondary,
               ),
             ],
@@ -124,69 +103,10 @@ class DoctorDetailsClinicCardWidget extends StatelessWidget {
         SizedBox(height: 14.h),
 
         // Action Buttons Row: Call Clinic & Message
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _makeCall(doctor.phoneNumber),
-                icon: Icon(
-                  Icons.phone_outlined,
-                  size: 18.r,
-                  color: AppColors.colorPrimary,
-                ),
-                label: Text(
-                  context.translate(LocalizationKeys.callClinic),
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.colorPrimary,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  side: const BorderSide(
-                    color: AppColors.colorPrimary,
-                    width: 1.2,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _sendMessage(doctor.phoneNumber),
-                icon: Icon(
-                  Icons.chat_bubble_outline_rounded,
-                  size: 18.r,
-                  color: AppColors.colorPrimary,
-                ),
-                label: Text(
-                  context.translate(LocalizationKeys.message),
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.colorPrimary,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  side: const BorderSide(
-                    color: AppColors.colorPrimary,
-                    width: 1.2,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                ),
-              ),
-            ),
-          ],
+        AppContactActionsWidget.clinic(
+          phoneNumber: doctor.phoneNumber,
         ),
       ],
     );
   }
 }
-

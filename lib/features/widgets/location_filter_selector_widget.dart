@@ -162,7 +162,7 @@ class LocationFilterSelectorWidget extends StatelessWidget {
 
   Widget _buildDropdownsRow(BuildContext context) {
     final curGov = _currentGovernorate;
-    final validGovId = curGov != null ? curGov.id : null;
+    final validGovId = curGov?.id;
 
     final curAreas = _currentAreas;
     final validAreaMatch = curAreas.where(

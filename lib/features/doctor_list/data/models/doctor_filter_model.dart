@@ -92,6 +92,22 @@ class DoctorFilterModel extends Equatable {
         (insuranceCompany != null && insuranceCompany!.isNotEmpty);
   }
 
+  int get activeFiltersCount {
+    int count = 0;
+    if (area != null && area!.isNotEmpty && area != 'all') count++;
+    if (governorate != null &&
+        governorate!.isNotEmpty &&
+        governorate != 'all') {
+      count++;
+    }
+    if (gender != null && gender != 0) count++;
+    if (minPrice != null && minPrice! > 0) count++;
+    if (maxPrice != null && maxPrice! < 1000) count++;
+    if (consultationDate != null && consultationDate != 'any') count++;
+    if (insuranceCompany != null && insuranceCompany!.isNotEmpty) count++;
+    return count;
+  }
+
   static const DoctorFilterModel initial = DoctorFilterModel(
     governorate: null,
     governorateId: null,

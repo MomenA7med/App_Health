@@ -1,3 +1,4 @@
+import 'package:app_health/features/widgets/app_error_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,11 +19,7 @@ import 'package:app_health/features/doctor_details/presentation/widgets/doctor_d
 import 'package:app_health/features/doctor_details/presentation/widgets/doctor_details_header_widget.dart';
 import 'package:app_health/features/doctor_details/presentation/widgets/doctor_details_tabs_widget.dart';
 import 'package:app_health/features/doctor_details/presentation/widgets/doctor_reviews_tab_widget.dart';
-import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
-import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/feedback/feedback_message.dart';
-import 'package:app_health/utils/loaders/loader_widget.dart';
-import 'package:app_health/utils/locale/app_localization_keys.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   final String doctorId;
@@ -43,10 +40,7 @@ class DoctorDetailsScreen extends StatelessWidget {
   }) {
     context.push(
       routeName,
-      extra: {
-        'doctorId': doctorId,
-        'consultationFee': consultationFee,
-      },
+      extra: {'doctorId': doctorId, 'consultationFee': consultationFee},
     );
   }
 
@@ -56,10 +50,12 @@ class DoctorDetailsScreen extends StatelessWidget {
     final DoctorDetailsRepository repository = DoctorDetailsRepository(
       DoctorDetailsApiManager(dioApiManager),
     );
-    final GetDoctorProfileUseCase profileUseCase =
-        GetDoctorProfileUseCase(repository);
-    final GetDoctorReviewsUseCase reviewsUseCase =
-        GetDoctorReviewsUseCase(repository);
+    final GetDoctorProfileUseCase profileUseCase = GetDoctorProfileUseCase(
+      repository,
+    );
+    final GetDoctorReviewsUseCase reviewsUseCase = GetDoctorReviewsUseCase(
+      repository,
+    );
 
     return BlocProvider<DoctorDetailsBloc>(
       create: (BuildContext context) => DoctorDetailsBloc(
@@ -97,6 +93,11 @@ class _DoctorDetailsScreenContentState
       backgroundColor: Colors.white,
       body: BlocConsumer<DoctorDetailsBloc, DoctorDetailsState>(
         listener: (context, state) {
+          if (state is DoctorDetailsLoadingState) {
+            showLoading();
+          } else {
+            hideLoading();
+          }
           if (state is DoctorDetailsErrorState) {
             showFeedbackMessage(
               state.isLocalizationKey
@@ -106,47 +107,14 @@ class _DoctorDetailsScreenContentState
           }
         },
         builder: (context, state) {
-          if (state is DoctorDetailsLoadingState) {
-            return const Center(child: LoaderWidget());
-          }
-
           if (state is DoctorDetailsErrorState) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      size: 56.r,
-                      color: AppColors.errorRed,
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      state.isLocalizationKey
-                          ? context.translate(state.errorMessage)
-                          : state.errorMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: AppColors.labelSubtitle,
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
-                    AppElevatedButton.withTitle(
-                      title: context.translate(LocalizationKeys.retry),
-                      onPressed: () {
-                        context.read<DoctorDetailsBloc>().add(
-                              FetchDoctorDetailsEvent(
-                                doctorId: widget.doctorId,
-                              ),
-                            );
-                      },
-                    ),
-                  ],
-                ),
-              ),
+            return AppErrorWidget(
+              errorMessage: state.errorMessage,
+              onRetry: () {
+                context.read<DoctorDetailsBloc>().add(
+                  FetchDoctorDetailsEvent(doctorId: widget.doctorId),
+                );
+              },
             );
           }
 
@@ -162,9 +130,9 @@ class _DoctorDetailsScreenContentState
                           doctor: state.doctor,
                           isFavorite: state.isFavorite,
                           onFavoriteTap: () {
-                            context
-                                .read<DoctorDetailsBloc>()
-                                .add(const ToggleDoctorFavoriteEvent());
+                            context.read<DoctorDetailsBloc>().add(
+                              const ToggleDoctorFavoriteEvent(),
+                            );
                           },
                           onBackTap: () {
                             if (Navigator.of(context).canPop()) {
@@ -203,10 +171,10 @@ class _DoctorDetailsScreenContentState
                                   activeTab: state.activeTab,
                                   onTabChanged: (tabIndex) {
                                     context.read<DoctorDetailsBloc>().add(
-                                          ChangeDoctorDetailsTabEvent(
-                                            tabIndex: tabIndex,
-                                          ),
-                                        );
+                                      ChangeDoctorDetailsTabEvent(
+                                        tabIndex: tabIndex,
+                                      ),
+                                    );
                                   },
                                 ),
                                 SizedBox(height: 20.h),
@@ -230,12 +198,9 @@ class _DoctorDetailsScreenContentState
                   ),
                 ),
 
-                // Persistent Bottom Booking Bar
+                // Persistent Bottom Consultation Fee Bar
                 DoctorBookingBottomBarWidget(
                   consultationFee: widget.consultationFee,
-                  onProceedTap: () {
-                    // Action for booking flow
-                  },
                 ),
               ],
             );

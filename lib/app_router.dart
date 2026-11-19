@@ -1,10 +1,18 @@
 import 'package:app_health/features/addresses/presentation/screens/add_address_screen.dart';
 import 'package:app_health/features/doctor_details/presentation/screens/doctor_details_screen.dart';
 import 'package:app_health/features/doctor_list/presentation/screens/doctor_list_screen.dart';
+import 'package:app_health/features/home/presentation/screens/home_screen.dart';
 import 'package:app_health/features/hospital_details/presentation/screens/hospital_details_screen.dart';
 import 'package:app_health/features/hospital_list/presentation/screens/hospital_list_screen.dart';
 import 'package:app_health/features/login/presentation/screen/login_screen.dart';
 import 'package:app_health/features/medical_specialties/presentation/screen/medical_specialties_screen.dart';
+import 'package:app_health/features/pharmacies_list/presentation/screens/pharmacies_list_screen.dart';
+import 'package:app_health/features/pharmacy_details/presentation/screens/pharmacy_details_screen.dart';
+import 'package:app_health/features/send_prescription/data/models/send_prescription_response_model.dart';
+import 'package:app_health/features/send_prescription/presentation/screens/capture_prescription_screen.dart';
+import 'package:app_health/features/send_prescription/presentation/screens/prescription_sent_screen.dart';
+import 'package:app_health/features/send_prescription/presentation/screens/review_prescription_screen.dart';
+import 'package:app_health/features/send_prescription/presentation/screens/send_prescription_screen.dart';
 import 'package:app_health/features/register/presentation/screen/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -32,6 +40,10 @@ class AppRouter {
       GoRoute(
         path: RegisterScreen.routeName,
         builder: (context, state) => RegisterScreen(),
+      ),
+      GoRoute(
+        path: HomeScreen.routeName,
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: MedicalSpecialtiesScreen.routeName,
@@ -77,6 +89,76 @@ class AppRouter {
           return HospitalDetailsScreen(
             hospitalId: hospitalId,
           );
+        },
+      ),
+      GoRoute(
+        path: PharmaciesListScreen.routeName,
+        builder: (context, state) => const PharmaciesListScreen(),
+      ),
+      GoRoute(
+        path: PharmacyDetailsScreen.routeName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final pharmacyId = extra['pharmacyId'] as String? ?? '';
+          return PharmacyDetailsScreen(
+            pharmacyId: pharmacyId,
+          );
+        },
+      ),
+      GoRoute(
+        path: CapturePrescriptionScreen.routeName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final pharmacyId = extra['preselectedPharmacyId'] as String?;
+          final existingImagePaths =
+              (extra['existingImagePaths'] as List<dynamic>?)?.cast<String>();
+          final isAddingPhoto = extra['isAddingPhoto'] as bool? ?? false;
+          return CapturePrescriptionScreen(
+            preselectedPharmacyId: pharmacyId,
+            existingImagePaths: existingImagePaths,
+            isAddingPhoto: isAddingPhoto,
+          );
+        },
+      ),
+      GoRoute(
+        path: ReviewPrescriptionScreen.routeName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final imagePath = extra['imagePath'] as String? ?? '';
+          final imagePaths =
+              (extra['imagePaths'] as List<dynamic>?)?.cast<String>();
+          final pharmacyId = extra['preselectedPharmacyId'] as String?;
+          return ReviewPrescriptionScreen(
+            imagePath: imagePath,
+            imagePaths: imagePaths,
+            preselectedPharmacyId: pharmacyId,
+          );
+        },
+      ),
+      GoRoute(
+        path: SendPrescriptionScreen.routeName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final imagePath = extra['imagePath'] as String?;
+          final imagePaths =
+              (extra['imagePaths'] as List<dynamic>?)?.cast<String>();
+          final isWithoutPrescription =
+              extra['isWithoutPrescription'] as bool? ?? false;
+          final pharmacyId = extra['preselectedPharmacyId'] as String?;
+          return SendPrescriptionScreen(
+            imagePath: imagePath,
+            imagePaths: imagePaths,
+            isWithoutPrescription: isWithoutPrescription,
+            preselectedPharmacyId: pharmacyId,
+          );
+        },
+      ),
+      GoRoute(
+        path: PrescriptionSentScreen.routeName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final order = extra['order'] as PrescriptionOrderModel;
+          return PrescriptionSentScreen(order: order);
         },
       ),
     ],

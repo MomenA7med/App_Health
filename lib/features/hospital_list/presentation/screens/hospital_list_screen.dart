@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_health/apis/_base/dio_api_manager.dart';
-import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/core/pagination_manager.dart';
 import 'package:app_health/core/widgets/base_stateful_screen_widget.dart';
 import 'package:app_health/features/addresses/presentation/widgets/choose_address_bottom_sheet.dart';
@@ -26,8 +24,8 @@ import 'package:app_health/features/hospital_list/presentation/screens/hospital_
 import 'package:app_health/features/hospital_list/presentation/widgets/hospital_card_widget.dart';
 import 'package:app_health/features/hospital_list/presentation/widgets/hospital_search_bar_widget.dart';
 import 'package:app_health/features/hospital_list/presentation/widgets/hospital_sort_bottom_sheet_widget.dart';
+import 'package:app_health/features/widgets/filter_and_sort_row_widget.dart';
 import 'package:app_health/features/widgets/pagination_widgets/paging_swipe_to_refresh_list_widget.dart';
-import 'package:app_health/res/app_asset_paths.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/feedback/feedback_message.dart';
 import 'package:app_health/utils/loaders/loader_widget.dart';
@@ -191,129 +189,26 @@ class _HospitalListScreenWithBlocState
   }
 
   Widget _buildFilterAndSortRow(BuildContext context) {
-    final hasActiveFilter = currentFilter.hasActiveFilters;
-
-    return Row(
-      children: [
-        // Filter Button on start
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              final result = await HospitalListFilterScreen.open(
-                context: context,
-                currentFilter: currentFilter,
-              );
-              if (result != null) {
-                _applyFilter(result);
-              }
-            },
-            borderRadius: BorderRadius.circular(24.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: hasActiveFilter
-                    ? AppColors.colorPrimary
-                    : AppColors.colorSecondary,
-                borderRadius: BorderRadius.circular(24.r),
-                border: Border.all(color: AppColors.colorPrimary, width: 1.2),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    AppAssetPaths.filterIcon,
-                    width: 18.w,
-                    height: 18.h,
-                    colorFilter: ColorFilter.mode(
-                      hasActiveFilter
-                          ? AppColors.buttonWhiteTextColor
-                          : AppColors.textSecondaryColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    context.translate(LocalizationKeys.filter),
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
-                      color: hasActiveFilter
-                          ? AppColors.buttonWhiteTextColor
-                          : AppColors.textSecondaryColor,
-                    ),
-                  ),
-                  if (hasActiveFilter) ...[
-                    SizedBox(width: 6.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 6.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: AppColors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${currentFilter.activeFiltersCount}',
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.colorPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 12.w),
-
-        // Sort Dropdown Button on end
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              HospitalSortBottomSheetWidget.show(
-                context: context,
-                currentSort: currentSort,
-                onApply: _applySort,
-              );
-            },
-            borderRadius: BorderRadius.circular(24.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 22,
-                    color: AppColors.textSecondaryColor,
-                  ),
-                  SizedBox(width: 6.w),
-                  Flexible(
-                    child: Text(
-                      _getSortOptionLabel(context, currentSort),
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textHeader,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    return FilterAndSortRowWidget(
+      onFilterTap: () async {
+        final result = await HospitalListFilterScreen.open(
+          context: context,
+          currentFilter: currentFilter,
+        );
+        if (result != null) {
+          _applyFilter(result);
+        }
+      },
+      onSortTap: () {
+        HospitalSortBottomSheetWidget.show(
+          context: context,
+          currentSort: currentSort,
+          onApply: _applySort,
+        );
+      },
+      sortLabel: _getSortOptionLabel(context, currentSort),
+      hasActiveFilter: currentFilter.hasActiveFilters,
+      activeFiltersCount: currentFilter.activeFiltersCount,
     );
   }
 

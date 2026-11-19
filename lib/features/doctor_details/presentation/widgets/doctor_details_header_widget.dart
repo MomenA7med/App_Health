@@ -32,7 +32,10 @@ class DoctorDetailsHeaderWidget extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.headerGradientStart, AppColors.headerGradientEnd],
+                colors: [
+                  AppColors.headerGradientStart,
+                  AppColors.headerGradientEnd,
+                ],
               ),
             ),
           ),
@@ -72,7 +75,7 @@ class DoctorDetailsHeaderWidget extends StatelessWidget {
           Positioned(
             left: 20.w,
             right: 20.w,
-            bottom: 24.h,
+            bottom: 40.h,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -163,9 +166,7 @@ class DoctorDetailsHeaderWidget extends StatelessWidget {
                       ],
                     ),
                     child: Icon(
-                      Directionality.of(context) == TextDirection.ltr
-                          ? Icons.arrow_forward_ios_rounded
-                          : Icons.arrow_back_ios_rounded,
+                      Icons.arrow_back_ios_rounded,
                       size: 16.r,
                       color: AppColors.buttonBlackTextColor,
                     ),

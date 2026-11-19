@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:app_health/apis/_base/dio_api_manager.dart';
-import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/core/widgets/base_stateful_screen_widget.dart';
 import 'package:app_health/features/doctor_list/presentation/screens/doctor_list_screen.dart';
 import 'package:app_health/features/hospital_details/data/datasources/hospital_details_api_manager.dart';
@@ -19,11 +17,10 @@ import 'package:app_health/features/hospital_details/presentation/widgets/hospit
 import 'package:app_health/features/hospital_details/presentation/widgets/hospital_details_header_widget.dart';
 import 'package:app_health/features/hospital_details/presentation/widgets/hospital_insurance_tab_widget.dart';
 import 'package:app_health/features/hospital_details/presentation/widgets/hospital_specialties_tab_widget.dart';
-import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
+import 'package:app_health/features/widgets/app_error_widget.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/feedback/feedback_message.dart';
 import 'package:app_health/utils/loaders/loader_widget.dart';
-import 'package:app_health/utils/locale/app_localization_keys.dart';
 
 class HospitalDetailsScreen extends StatelessWidget {
   final String hospitalId;
@@ -120,44 +117,16 @@ class _HospitalDetailsScreenContentState
           }
 
           if (state is HospitalDetailsErrorState) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      size: 54.r,
-                      color: AppColors.errorRed,
-                    ),
-                    SizedBox(height: 12.h),
-                    Text(
-                      state.isMessageLocalizationKey
-                          ? context.translate(state.message)
-                          : state.message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: AppColors.buttonBlackTextColor,
+            return AppErrorWidget(
+              errorMessage: state.message,
+              isLocalizationKey: state.isMessageLocalizationKey,
+              onRetry: () {
+                context.read<HospitalDetailsBloc>().add(
+                      FetchHospitalDetailsEvent(
+                        hospitalId: widget.hospitalId,
                       ),
-                    ),
-                    SizedBox(height: 20.h),
-                    AppElevatedButton.withTitle(
-                      title: context.translate(LocalizationKeys.retry),
-                      color: AppColors.colorPrimary,
-                      textColor: AppColors.white,
-                      onPressed: () {
-                        context.read<HospitalDetailsBloc>().add(
-                              FetchHospitalDetailsEvent(
-                                hospitalId: widget.hospitalId,
-                              ),
-                            );
-                      },
-                    ),
-                  ],
-                ),
-              ),
+                    );
+              },
             );
           }
 

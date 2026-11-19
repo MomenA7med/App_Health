@@ -82,9 +82,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               border: Border.all(color: AppColors.borderLight),
             ),
             child: Icon(
-              Directionality.of(context) == TextDirection.ltr
-                  ? Icons.arrow_forward_ios_rounded
-                  : Icons.arrow_back_ios_rounded,
+              Icons.arrow_back_ios_rounded,
               size: 16.r,
               color: AppColors.buttonBlackTextColor,
             ),

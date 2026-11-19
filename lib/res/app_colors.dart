@@ -13,7 +13,6 @@ abstract final class AppColors {
   static const Color _black87 = Color(0xDD000000);
   static const Color _grey = Color(0xFF9E9E9E);
   static const Color _gray727171 = Color(0xFF727171);
-  static const Color _gray919191 = Color(0xFF919191);
   static const Color _checkboxBorder = Color(0xFFADB7C2);
   static const Color _alto = Color(0xffD9D9D9);
   static const Color _yellowOrange = Color(0xffFAAF40);
@@ -75,6 +74,10 @@ abstract final class AppColors {
   static const Color _scandal = Color(0xFFD1FAE5);
   static const Color _watercourse = Color(0xFF065F46);
   static const Color _blackShadow = Color(0x0A000000);
+  static const Color _earlyDawn = Color(0xFFFFFBEB);
+  static const Color _pirateGold = Color(0xFF92580D);
+  static const Color _pattensBlue = Color(0xFFC3E1F0);
+  static const Color _eden = Color(0xFF306A6D);
 
   /// app main theme ...
   static const colorSchemeSeed = _hippieBlue;
@@ -120,6 +123,10 @@ abstract final class AppColors {
   static const Color badgeGreenText = _watercourse;
   static const Color tabBackground = _porcelain;
   static const Color shadowColor = _blackShadow;
+  static const Color pendingWarningBg = _earlyDawn;
+  static const Color pendingWarningText = _pirateGold;
+  static const Color pharmacyChipBg = _pattensBlue;
+  static const Color pharmacyChipText = _eden;
   static const buttonBackground = colorPrimary;
   static const verifyEmailText = colorPrimary;
   static const verifyEmailDescriptionText = _black;

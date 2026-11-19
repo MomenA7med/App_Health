@@ -1,11 +1,9 @@
 import 'package:app_health/features/doctor_details/presentation/screens/doctor_details_screen.dart';
 import 'package:app_health/features/addresses/presentation/widgets/choose_address_bottom_sheet.dart';
 import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
-import 'package:app_health/res/app_asset_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_health/apis/_base/dio_api_manager.dart';
@@ -26,7 +24,8 @@ import 'package:app_health/features/doctor_list/presentation/screens/doctor_list
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_card_widget.dart';
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_search_bar_widget.dart';
 import 'package:app_health/features/doctor_list/presentation/widgets/doctor_sort_bottom_sheet_widget.dart';
-import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
+import 'package:app_health/features/widgets/app_error_widget.dart';
+import 'package:app_health/features/widgets/filter_and_sort_row_widget.dart';
 import 'package:app_health/features/widgets/pagination_widgets/paging_swipe_to_refresh_list_widget.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/feedback/feedback_message.dart';
@@ -227,98 +226,24 @@ class _DoctorListScreenWithBlocState
   }
 
   Widget _buildFilterAndSortRow(BuildContext context) {
-    return Row(
-      children: [
-        // Filter Button on the right (RTL start)
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              DoctorListFilterScreen.open(
-                context: context,
-                currentFilter: currentFilter,
-                onApply: _applyFilter,
-              );
-            },
-            borderRadius: BorderRadius.circular(24.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: AppColors.colorSecondary,
-                borderRadius: BorderRadius.circular(24.r),
-                border: Border.all(color: AppColors.colorPrimary, width: 1.2),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    AppAssetPaths.filterIcon,
-                    width: 18.w,
-                    height: 18.h,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.textSecondaryColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    context.translate(LocalizationKeys.filter),
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textSecondaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 12.w),
-
-        // Sort Dropdown Button on the left (RTL end)
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              DoctorSortBottomSheetWidget.show(
-                context: context,
-                currentSort: currentSort,
-                onApply: _applySort,
-              );
-            },
-            borderRadius: BorderRadius.circular(24.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 22,
-                    color: AppColors.textSecondaryColor,
-                  ),
-                  SizedBox(width: 6.w),
-                  Flexible(
-                    child: Text(
-                      _getSortOptionLabel(context, currentSort),
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textHeader,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    return FilterAndSortRowWidget(
+      onFilterTap: () {
+        DoctorListFilterScreen.open(
+          context: context,
+          currentFilter: currentFilter,
+          onApply: _applyFilter,
+        );
+      },
+      onSortTap: () {
+        DoctorSortBottomSheetWidget.show(
+          context: context,
+          currentSort: currentSort,
+          onApply: _applySort,
+        );
+      },
+      sortLabel: _getSortOptionLabel(context, currentSort),
+      hasActiveFilter: currentFilter.hasActiveFilters,
+      activeFiltersCount: currentFilter.activeFiltersCount,
     );
   }
 
@@ -413,36 +338,13 @@ class _DoctorListScreenWithBlocState
     }
 
     if (state is DoctorListErrorState && getUpdatedData.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              color: AppColors.redButtonColor,
-              size: 48.r,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              state.isLocalizationKey
-                  ? context.translate(state.errorMassage)
-                  : state.errorMassage,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: AppColors.labelSubtitle),
-            ),
-            SizedBox(height: 16.h),
-            SizedBox(
-              width: 140.w,
-              child: AppElevatedButton.withTitle(
-                onPressed: () {
-                  _resetPaging();
-                  _getDoctorListsApiEvent();
-                },
-                title: context.translate(LocalizationKeys.retry),
-              ),
-            ),
-          ],
-        ),
+      return AppErrorWidget(
+        errorMessage: state.errorMassage,
+        isLocalizationKey: state.isLocalizationKey,
+        onRetry: () {
+          _resetPaging();
+          _getDoctorListsApiEvent();
+        },
       );
     }
 

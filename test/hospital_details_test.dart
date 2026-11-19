@@ -11,10 +11,6 @@ import 'package:app_health/features/hospital_details/presentation/bloc/hospital_
 import 'package:app_health/features/hospital_details/presentation/bloc/hospital_details_event.dart';
 import 'package:app_health/features/hospital_details/presentation/bloc/hospital_details_state.dart';
 import 'package:app_health/features/hospital_details/presentation/screens/hospital_details_screen.dart';
-import 'package:app_health/features/hospital_details/presentation/widgets/hospital_about_tab_widget.dart';
-import 'package:app_health/features/hospital_details/presentation/widgets/hospital_details_header_widget.dart';
-import 'package:app_health/features/hospital_details/presentation/widgets/hospital_insurance_tab_widget.dart';
-import 'package:app_health/features/hospital_details/presentation/widgets/hospital_specialties_tab_widget.dart';
 import 'package:app_health/features/widgets/app_capsule_tabs_widget.dart';
 import 'package:app_health/utils/locale/app_localization.dart';
 import 'package:app_health/utils/locale/app_localization_keys.dart';

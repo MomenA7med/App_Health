@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app_health/core/extensions/extension_localization.dart';
 import 'package:app_health/features/core/data/models/meta/paging_send_model.dart';
 import 'package:app_health/features/doctor_list/data/models/governorate_model.dart';
 import 'package:app_health/features/doctor_list/data/models/insurance_company_model.dart';

@@ -6,12 +6,12 @@ import 'package:app_health/utils/locale/app_localization_keys.dart';
 
 class DoctorBookingBottomBarWidget extends StatelessWidget {
   final double? consultationFee;
-  final VoidCallback onProceedTap;
+  final VoidCallback? onProceedTap;
 
   const DoctorBookingBottomBarWidget({
     super.key,
     this.consultationFee,
-    required this.onProceedTap,
+    this.onProceedTap,
   });
 
   @override
@@ -21,6 +21,78 @@ class DoctorBookingBottomBarWidget extends StatelessWidget {
             ? consultationFee!.toInt().toString()
             : consultationFee!.toStringAsFixed(1))
         : '350';
+
+    if (onProceedTap == null) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.payments_outlined,
+                      size: 22.r,
+                      color: AppColors.colorPrimary,
+                    ),
+                    SizedBox(width: 10.w),
+                    Text(
+                      context.translate(LocalizationKeys.consultationFee),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      feeText,
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.buttonBlackTextColor,
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      context.translate(LocalizationKeys.currencyEgp),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.buttonBlackTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),

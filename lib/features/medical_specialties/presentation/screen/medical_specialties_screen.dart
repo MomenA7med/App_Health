@@ -1,4 +1,4 @@
-import 'package:app_health/logic/user_manager.dart';
+import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,7 +14,7 @@ import 'package:app_health/features/doctor_list/presentation/screens/doctor_list
 import 'package:app_health/features/medical_specialties/presentation/widgets/medical_specialties_header_widget.dart';
 import 'package:app_health/features/medical_specialties/presentation/widgets/medical_specialties_search_bar_widget.dart';
 import 'package:app_health/features/medical_specialties/presentation/widgets/medical_specialty_card_widget.dart';
-import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
+import 'package:app_health/features/widgets/app_error_widget.dart';
 import 'package:app_health/res/app_colors.dart';
 import 'package:app_health/utils/feedback/feedback_message.dart';
 import 'package:app_health/utils/loaders/loader_widget.dart';
@@ -26,7 +26,7 @@ class MedicalSpecialtiesScreen extends StatelessWidget {
   static const String routeName = '/medical-specialties';
 
   static void open({required BuildContext context}) {
-    context.go(routeName);
+    context.push(routeName);
   }
 
   @override
@@ -71,26 +71,8 @@ class _MedicalSpecialtiesScreenWithBlocState
   Widget baseScreenBuild(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: AppColors.appBarBackground,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          context.translate(LocalizationKeys.medicalSpecialties),
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.buttonBlackTextColor,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await GetIt.I<UserMangers>().signOut();
-            },
-            icon: const Icon(Icons.logout_outlined),
-          ),
-        ],
+      appBar: CustomAppBar(
+        screenTitle: context.translate(LocalizationKeys.medicalSpecialties),
       ),
       body: BlocConsumer<MedicalSpecialtiesBloc, MedicalSpecialtiesState>(
         listener: (context, state) {
@@ -150,37 +132,14 @@ class _MedicalSpecialtiesScreenWithBlocState
     }
 
     if (state is MedicalSpecialtiesErrorState) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              color: AppColors.redButtonColor,
-              size: 48.r,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              state.isLocalizationKey
-                  ? context.translate(state.errorMessage)
-                  : state.errorMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: AppColors.labelSubtitle),
-            ),
-            SizedBox(height: 16.h),
-            SizedBox(
-              width: 140.w,
-              child: AppElevatedButton.withTitle(
-                onPressed: () {
-                  context.read<MedicalSpecialtiesBloc>().add(
-                    const FetchMedicalSpecialtiesEvent(),
-                  );
-                },
-                title: context.translate(LocalizationKeys.retry),
-              ),
-            ),
-          ],
-        ),
+      return AppErrorWidget(
+        errorMessage: state.errorMessage,
+        isLocalizationKey: state.isLocalizationKey,
+        onRetry: () {
+          context.read<MedicalSpecialtiesBloc>().add(
+            const FetchMedicalSpecialtiesEvent(),
+          );
+        },
       );
     }
 

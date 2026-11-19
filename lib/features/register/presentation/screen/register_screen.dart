@@ -106,7 +106,7 @@ class _RegisterScreenWithBlocState
         leading: context.canPop()
             ? IconButton(
                 icon: const Icon(
-                  Icons.arrow_back_ios_new,
+                  Icons.arrow_back_ios_rounded,
                   color: AppColors.appBarIconColor,
                   size: 20,
                 ),

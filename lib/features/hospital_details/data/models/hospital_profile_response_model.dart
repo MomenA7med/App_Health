@@ -28,11 +28,11 @@ class HospitalProfileResponseModel extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'code': code,
-        'message': message,
-        'data': data.toJson(),
-      };
+    'success': success,
+    'code': code,
+    'message': message,
+    'data': data.toJson(),
+  };
 
   @override
   List<Object?> get props => [success, code, message, data];
@@ -106,60 +106,72 @@ class HospitalProfileModel extends Equatable {
       isFavorite: json['isFavorite'] as bool? ?? false,
       acceptsPatientInsurance:
           json['acceptsPatientInsurance'] as bool? ?? false,
-      logoUrl: (json['logo_Url'] ?? json['logoUrl']) as String?,
-      coverUrl: (json['cover_url'] ?? json['coverUrl']) as String?,
+      logoUrl: json['logoUrl'] as String?,
+      coverUrl: json['coverUrl'] as String?,
       phone: json['phone'] as String?,
-      specialties: (json['specialties'] as List<dynamic>?)
-              ?.map((e) =>
-                  HospitalSpecialtyItemModel.fromJson(e as Map<String, dynamic>))
+      specialties:
+          (json['specialties'] as List<dynamic>?)
+              ?.map(
+                (e) => HospitalSpecialtyItemModel.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
               .toList() ??
           const [],
-      services: (json['services'] as List<dynamic>?)
-              ?.map((e) =>
-                  HospitalServiceItemModel.fromJson(e as Map<String, dynamic>))
+      services:
+          (json['services'] as List<dynamic>?)
+              ?.map(
+                (e) => HospitalServiceItemModel.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
               .toList() ??
           const [],
       specialtiesCount: (json['specialtiesCount'] as num?)?.toInt() ?? 0,
       specialtiesCountLabel: json['specialtiesCountLabel'] as String? ?? '',
       acceptedInsuranceCompanies:
           (json['acceptedInsuranceCompanies'] as List<dynamic>?)
-                  ?.map((e) =>
-                      InsuranceCompanyModel.fromJson(e as Map<String, dynamic>))
-                  .toList() ??
-              const [],
+              ?.map(
+                (e) =>
+                    InsuranceCompanyModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
       reviews: json['reviews'] != null
           ? DoctorReviewsDataModel.fromJson(
-              json['reviews'] as Map<String, dynamic>)
+              json['reviews'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'ratingAverage': ratingAverage,
-        'totalReviews': totalReviews,
-        'address': address,
-        'distanceKm': distanceKm,
-        'workingHoursStatus': workingHoursStatus,
-        'aboutText': aboutText,
-        'governorateId': governorateId,
-        'governorateName': governorateName,
-        'areaId': areaId,
-        'areaName': areaName,
-        'isFavorite': isFavorite,
-        'acceptsPatientInsurance': acceptsPatientInsurance,
-        'logo_Url': logoUrl,
-        'cover_url': coverUrl,
-        'phone': phone,
-        'specialties': specialties.map((e) => e.toJson()).toList(),
-        'services': services.map((e) => e.toJson()).toList(),
-        'specialtiesCount': specialtiesCount,
-        'specialtiesCountLabel': specialtiesCountLabel,
-        'acceptedInsuranceCompanies':
-            acceptedInsuranceCompanies.map((e) => e.toJson()).toList(),
-        'reviews': reviews?.toJson(),
-      };
+    'id': id,
+    'name': name,
+    'ratingAverage': ratingAverage,
+    'totalReviews': totalReviews,
+    'address': address,
+    'distanceKm': distanceKm,
+    'workingHoursStatus': workingHoursStatus,
+    'aboutText': aboutText,
+    'governorateId': governorateId,
+    'governorateName': governorateName,
+    'areaId': areaId,
+    'areaName': areaName,
+    'isFavorite': isFavorite,
+    'acceptsPatientInsurance': acceptsPatientInsurance,
+    'logo_Url': logoUrl,
+    'cover_url': coverUrl,
+    'phone': phone,
+    'specialties': specialties.map((e) => e.toJson()).toList(),
+    'services': services.map((e) => e.toJson()).toList(),
+    'specialtiesCount': specialtiesCount,
+    'specialtiesCountLabel': specialtiesCountLabel,
+    'acceptedInsuranceCompanies': acceptedInsuranceCompanies
+        .map((e) => e.toJson())
+        .toList(),
+    'reviews': reviews?.toJson(),
+  };
 
   HospitalProfileModel copyWith({
     String? id,
@@ -235,30 +247,30 @@ class HospitalProfileModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        ratingAverage,
-        totalReviews,
-        address,
-        distanceKm,
-        workingHoursStatus,
-        aboutText,
-        governorateId,
-        governorateName,
-        areaId,
-        areaName,
-        isFavorite,
-        acceptsPatientInsurance,
-        logoUrl,
-        coverUrl,
-        phone,
-        specialties,
-        services,
-        specialtiesCount,
-        specialtiesCountLabel,
-        acceptedInsuranceCompanies,
-        reviews,
-      ];
+    id,
+    name,
+    ratingAverage,
+    totalReviews,
+    address,
+    distanceKm,
+    workingHoursStatus,
+    aboutText,
+    governorateId,
+    governorateName,
+    areaId,
+    areaName,
+    isFavorite,
+    acceptsPatientInsurance,
+    logoUrl,
+    coverUrl,
+    phone,
+    specialties,
+    services,
+    specialtiesCount,
+    specialtiesCountLabel,
+    acceptedInsuranceCompanies,
+    reviews,
+  ];
 }
 
 class HospitalSpecialtyItemModel extends Equatable {
@@ -281,10 +293,10 @@ class HospitalSpecialtyItemModel extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nameAr': nameAr,
-        'nameEn': nameEn,
-      };
+    'id': id,
+    'nameAr': nameAr,
+    'nameEn': nameEn,
+  };
 
   String getName(BuildContext context) {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -319,10 +331,10 @@ class HospitalServiceItemModel extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nameAr': nameAr,
-        'nameEn': nameEn,
-      };
+    'id': id,
+    'nameAr': nameAr,
+    'nameEn': nameEn,
+  };
 
   String getName(BuildContext context) {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -336,4 +348,3 @@ class HospitalServiceItemModel extends Equatable {
   @override
   List<Object?> get props => [id, nameAr, nameEn];
 }
-

@@ -1,3 +1,4 @@
+import 'package:app_health/features/home/presentation/screens/home_screen.dart';
 import 'package:app_health/features/widgets/app_buttons/app_elevated_button.dart';
 import 'package:app_health/utils/locale/app_localization_keys.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,9 @@ class _LoginScreenWithBlocState extends BaseScreenState<LoginScreenWithBloc>
             );
           } else if (state is SavedUserInfoState) {
             _setLoggedInUserEvent();
-          } else if (state is SetLoggedInUserState) {}
+          } else if (state is SetLoggedInUserState) {
+            HomeScreen.open(context: context);
+          }
         },
         builder: (context, state) {
           return buildLoginWidget();
