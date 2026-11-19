@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
                     return MaterialApp.router(
                       key: ValueKey(state.languageCode),
                       debugShowCheckedModeBanner: false,
-                      title: "Health",
+                      title: "VIA",
                       theme: appThemeState.themeDataLight,
                       darkTheme: appThemeState.themeDataDark,
                       themeMode: ThemeMode.light,
