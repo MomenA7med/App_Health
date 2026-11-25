@@ -1,0 +1,249 @@
+import 'package:app_health/features/core/presentation/widgets/custom_app_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:app_health/apis/_base/dio_api_manager.dart';
+import 'package:app_health/core/widgets/base_stateful_screen_widget.dart';
+import 'package:app_health/features/medical_specialties/data/datasources/medical_specialties_api_manager.dart';
+import 'package:app_health/features/medical_specialties/data/repository/medical_specialties_repository.dart';
+import 'package:app_health/features/medical_specialties/domain/usecases/get_medical_specialties_usecase.dart';
+import 'package:app_health/features/medical_specialties/presentation/bloc/medical_specialties_bloc.dart';
+import 'package:app_health/features/doctor_list/presentation/screens/doctor_list_screen.dart';
+import 'package:app_health/features/medical_specialties/presentation/widgets/medical_specialties_search_bar_widget.dart';
+import 'package:app_health/features/medical_specialties/presentation/widgets/emergency_specialty_list_item_widget.dart';
+import 'package:app_health/features/widgets/app_error_widget.dart';
+import 'package:app_health/res/app_colors.dart';
+import 'package:app_health/utils/feedback/feedback_message.dart';
+import 'package:app_health/utils/loaders/loader_widget.dart';
+import 'package:app_health/utils/locale/app_localization_keys.dart';
+
+class EmergencySpecialtiesScreen extends StatelessWidget {
+  const EmergencySpecialtiesScreen({super.key});
+
+  static const String routeName = '/emergency-specialties';
+
+  static void open({required BuildContext context}) {
+    context.push(routeName);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final DioApiManager dioApiManager = GetIt.I<DioApiManager>();
+    final MedicalSpecialtiesRepository repository =
+        MedicalSpecialtiesRepository(
+          MedicalSpecialtiesApiManager(dioApiManager),
+        );
+    final GetMedicalSpecialtiesUseCase useCase = GetMedicalSpecialtiesUseCase(
+      repository,
+      isEmergency: true,
+    );
+
+    return BlocProvider<MedicalSpecialtiesBloc>(
+      create: (BuildContext context) =>
+          MedicalSpecialtiesBloc(getMedicalSpecialtiesUseCase: useCase)
+            ..add(const FetchMedicalSpecialtiesEvent()),
+      child: const _EmergencySpecialtiesScreenWithBloc(),
+    );
+  }
+}
+
+class _EmergencySpecialtiesScreenWithBloc extends BaseStatefulScreenWidget {
+  const _EmergencySpecialtiesScreenWithBloc();
+
+  @override
+  BaseScreenState<_EmergencySpecialtiesScreenWithBloc>
+  baseScreenCreateState() => _EmergencySpecialtiesScreenState();
+}
+
+class _EmergencySpecialtiesScreenState
+    extends BaseScreenState<_EmergencySpecialtiesScreenWithBloc> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget baseScreenBuild(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.scaffoldBackground,
+      appBar: CustomAppBar(
+        screenTitle: context.translate(LocalizationKeys.emergency),
+      ),
+      body: BlocConsumer<MedicalSpecialtiesBloc, MedicalSpecialtiesState>(
+        listener: (context, state) {
+          if (state is MedicalSpecialtiesErrorState) {
+            showFeedbackMessage(
+              state.isLocalizationKey
+                  ? context.translate(state.errorMessage)
+                  : state.errorMessage,
+            );
+          }
+        },
+        builder: (context, state) {
+          return RefreshIndicator(
+            color: AppColors.colorPrimary,
+            onRefresh: () async {
+              context.read<MedicalSpecialtiesBloc>().add(
+                const FetchMedicalSpecialtiesEvent(),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 12.h),
+                  _buildInstantConsultationBadge(context),
+                  SizedBox(height: 16.h),
+                  Text(
+                    context.translate(LocalizationKeys.talkToAvailableDoctor),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.buttonBlackTextColor,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  MedicalSpecialtiesSearchBarWidget(
+                    controller: _searchController,
+                    onChanged: (query) {
+                      context.read<MedicalSpecialtiesBloc>().add(
+                        SearchSpecialtiesEvent(query),
+                      );
+                    },
+                    onClear: () {
+                      _searchController.clear();
+                      context.read<MedicalSpecialtiesBloc>().add(
+                        const SearchSpecialtiesEvent(''),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 18.h),
+                  Text(
+                    context.translate(LocalizationKeys.chooseSpecialty),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.buttonBlackTextColor,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Expanded(child: _buildContent(context, state)),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInstantConsultationBadge(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: AppColors.colorSecondary,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.translate(LocalizationKeys.instantConsultation),
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondaryColor,
+            ),
+          ),
+          SizedBox(width: 6.w),
+          Container(
+            width: 8.r,
+            height: 8.r,
+            decoration: const BoxDecoration(
+              color: AppColors.textSecondaryColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, MedicalSpecialtiesState state) {
+    if (state is MedicalSpecialtiesLoadingState ||
+        state is MedicalSpecialtiesInitialState) {
+      return const Center(child: LoaderWidget());
+    }
+
+    if (state is MedicalSpecialtiesErrorState) {
+      return AppErrorWidget(
+        errorMessage: state.errorMessage,
+        isLocalizationKey: state.isLocalizationKey,
+        onRetry: () {
+          context.read<MedicalSpecialtiesBloc>().add(
+            const FetchMedicalSpecialtiesEvent(),
+          );
+        },
+      );
+    }
+
+    if (state is MedicalSpecialtiesLoadedState) {
+      if (state.filteredSpecialties.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search_off_rounded,
+                color: AppColors.textSecondary,
+                size: 56.r,
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                context.translate(LocalizationKeys.noSpecialtiesFound),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: AppColors.labelSubtitle,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: EdgeInsets.only(bottom: 24.h),
+        itemCount: state.filteredSpecialties.length,
+        separatorBuilder: (context, index) =>
+            Divider(height: 1, color: AppColors.borderLight),
+        itemBuilder: (context, index) {
+          final specialty = state.filteredSpecialties[index];
+          return EmergencySpecialtyListItemWidget(
+            specialty: specialty,
+            onTap: () {
+              DoctorListScreen.open(
+                context: context,
+                specialtyId: specialty.id,
+                specialtyTitle: specialty.getName(context),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+}

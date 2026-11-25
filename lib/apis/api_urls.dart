@@ -6,6 +6,7 @@ class ApiUrls {
 
   /// Medical Specialties
   static const medicalSpecialties = "/api/medical-specialties";
+  static const emergencySpecialties = "/api/emergency/specialties";
   static String specialtyDoctors(String specialtyId) =>
       "/api/medical-specialties/$specialtyId/doctors";
 

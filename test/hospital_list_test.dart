@@ -146,7 +146,9 @@ class _MockHospitalRepository implements BaseHospitalListRepository {
 
 class _MockSpecialtiesRepository implements BaseMedicalSpecialtiesRepository {
   @override
-  Future<MedicalSpecialtiesResponseModel> getMedicalSpecialties() async {
+  Future<MedicalSpecialtiesResponseModel> getMedicalSpecialties({
+    bool isEmergency = false,
+  }) async {
     return MedicalSpecialtiesResponseModel(
       success: true,
       code: 'SPECIALTIES_RETRIEVED',

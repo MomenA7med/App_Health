@@ -247,5 +247,9 @@
   "medical_specialties_desc": "احجز مع نخبة من الأطباء في كافة التخصصات الطبية",
   "hospitals_desc": "ابحث عن أقرب المستشفيات والمراكز الطبية المعتمدة",
   "pharmacies_desc": "اطلب أدويتك وأرسل الروشتة لأقرب صيدلية بسهولة",
-  "logout": "تسجيل الخروج"
+  "logout": "تسجيل الخروج",
+  "emergency": "الطوارئ",
+  "instant_consultation": "استشارة فورية",
+  "talk_to_available_doctor": "تحدّث إلى طبيب متاح الآن",
+  "choose_specialty": "اختر التخصص"
 }

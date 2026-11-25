@@ -9,11 +9,15 @@ class MedicalSpecialtiesApiManager {
   MedicalSpecialtiesApiManager(this.dioApiManager);
 
   Future<void> getMedicalSpecialties({
+    bool isEmergency = false,
     required void Function(MedicalSpecialtiesResponseModel) success,
     required void Function(ErrorApiModel) fail,
   }) async {
+    final String url = isEmergency
+        ? ApiUrls.emergencySpecialties
+        : ApiUrls.medicalSpecialties;
     await dioApiManager.dio
-        .get(ApiUrls.medicalSpecialties)
+        .get(url)
         .then((response) {
           Map<String, dynamic> extractedData =
               response.data as Map<String, dynamic>;

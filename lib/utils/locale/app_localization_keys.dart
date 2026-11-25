@@ -275,4 +275,10 @@ class LocalizationKeys {
   static const hospitalsDesc = 'hospitals_desc';
   static const pharmaciesDesc = 'pharmacies_desc';
   static const logout = 'logout';
+
+  /// Emergency Specialties
+  static const emergency = 'emergency';
+  static const instantConsultation = 'instant_consultation';
+  static const talkToAvailableDoctor = 'talk_to_available_doctor';
+  static const chooseSpecialty = 'choose_specialty';
 }

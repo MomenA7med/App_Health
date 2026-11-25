@@ -250,6 +250,10 @@
   "medical_specialties_desc": "Book with elite doctors across all medical specialties",
   "hospitals_desc": "Find nearby accredited hospitals and medical centers",
   "pharmacies_desc": "Order medicines and send prescriptions with ease",
-  "logout": "Sign out"
+  "logout": "Sign out",
+  "emergency": "Emergency",
+  "instant_consultation": "Instant Consultation",
+  "talk_to_available_doctor": "Talk to an available doctor now",
+  "choose_specialty": "Choose Specialty"
 }
 

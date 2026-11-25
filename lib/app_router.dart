@@ -5,6 +5,7 @@ import 'package:app_health/features/home/presentation/screens/home_screen.dart';
 import 'package:app_health/features/hospital_details/presentation/screens/hospital_details_screen.dart';
 import 'package:app_health/features/hospital_list/presentation/screens/hospital_list_screen.dart';
 import 'package:app_health/features/login/presentation/screen/login_screen.dart';
+import 'package:app_health/features/medical_specialties/presentation/screen/emergency_specialties_screen.dart';
 import 'package:app_health/features/medical_specialties/presentation/screen/medical_specialties_screen.dart';
 import 'package:app_health/features/pharmacies_list/presentation/screens/pharmacies_list_screen.dart';
 import 'package:app_health/features/pharmacy_details/presentation/screens/pharmacy_details_screen.dart';
@@ -48,6 +49,10 @@ class AppRouter {
       GoRoute(
         path: MedicalSpecialtiesScreen.routeName,
         builder: (context, state) => const MedicalSpecialtiesScreen(),
+      ),
+      GoRoute(
+        path: EmergencySpecialtiesScreen.routeName,
+        builder: (context, state) => const EmergencySpecialtiesScreen(),
       ),
       GoRoute(
         path: DoctorListScreen.routeName,

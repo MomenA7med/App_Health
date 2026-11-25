@@ -100,7 +100,7 @@ abstract final class AppColors {
   static const neutral10 = _mercury;
   static const lightSurface = _alabaster;
 
-  static const Color borderLight = _catskillWhite;
+  static const Color borderLight = _athensGray;
   static const Color textMuted = _slateGray;
   static const Color textSecondary = _gullGray;
   static const Color textBody = _nevada;

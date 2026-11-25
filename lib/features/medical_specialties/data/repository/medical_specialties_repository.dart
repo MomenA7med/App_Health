@@ -8,9 +8,12 @@ class MedicalSpecialtiesRepository implements BaseMedicalSpecialtiesRepository {
   MedicalSpecialtiesRepository(this.apiManager);
 
   @override
-  Future<MedicalSpecialtiesResponseModel> getMedicalSpecialties() async {
+  Future<MedicalSpecialtiesResponseModel> getMedicalSpecialties({
+    bool isEmergency = false,
+  }) async {
     late MedicalSpecialtiesResponseModel responseModel;
     await apiManager.getMedicalSpecialties(
+      isEmergency: isEmergency,
       success: (response) {
         responseModel = response;
       },

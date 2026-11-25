@@ -7,8 +7,9 @@ import 'package:app_health/features/medical_specialties/domain/repositories/base
 class GetMedicalSpecialtiesUseCase
     extends BaseUseCase<MedicalSpecialtiesResponseModel, NoParams> {
   final BaseMedicalSpecialtiesRepository repository;
+  final bool isEmergency;
 
-  GetMedicalSpecialtiesUseCase(this.repository);
+  GetMedicalSpecialtiesUseCase(this.repository, {this.isEmergency = false});
 
   @override
   Future<Either<ErrorApiModel, MedicalSpecialtiesResponseModel>> call(
@@ -16,7 +17,7 @@ class GetMedicalSpecialtiesUseCase
   ) async {
     late Either<ErrorApiModel, MedicalSpecialtiesResponseModel> result;
     await repository
-        .getMedicalSpecialties()
+        .getMedicalSpecialties(isEmergency: isEmergency)
         .then((response) {
           result = Right(response);
         })

@@ -11,7 +11,9 @@ class FakeMedicalSpecialtiesRepository
   List<MedicalSpecialtyModel> specialties = [];
 
   @override
-  Future<MedicalSpecialtiesResponseModel> getMedicalSpecialties() async {
+  Future<MedicalSpecialtiesResponseModel> getMedicalSpecialties({
+    bool isEmergency = false,
+  }) async {
     if (shouldFail) {
       throw ErrorApiModel(
         isMessageLocalizationKey: false,

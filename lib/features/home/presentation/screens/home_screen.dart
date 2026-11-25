@@ -1,3 +1,4 @@
+import 'package:app_health/features/medical_specialties/presentation/screen/emergency_specialties_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -97,7 +98,7 @@ class HomeScreen extends StatelessWidget {
                       iconBackgroundColor: AppColors.colorSecondary,
                       accentColor: AppColors.colorPrimary,
                       onTap: () {
-                        MedicalSpecialtiesScreen.open(context: context);
+                        EmergencySpecialtiesScreen.open(context: context);
                       },
                     ),
                     SizedBox(height: 14.h),
